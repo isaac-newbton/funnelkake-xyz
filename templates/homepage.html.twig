@@ -1,12 +1,16 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-    </head>
-    <body>
-        {% block body %}This is the homepage.{% endblock %}
-        {% block javascripts %}{% endblock %}
-    </body>
-</html>
+{% extends "base.html.twig" %}
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1>Homepage</h1>
+                <p>This is the homepage</p>
+                {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                    <a href="{{logout_url(null)}}" class="btn btn-outline-primary">Logout</a>
+                {% else %}
+                    <a href="{{path('app_login')}}" class="btn btn-primary btn-lg">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
