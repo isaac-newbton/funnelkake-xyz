@@ -32,10 +32,10 @@
             "ref": "a9f2463b9f73efe74482f831f03a204a41328555"
         },
         "files": [
-            "config/packages/doctrine.yaml",
-            "config/packages/prod/doctrine.yaml",
-            "src/Entity/.gitignore",
-            "src/Repository/.gitignore"
+            "./config/packages/doctrine.yaml",
+            "./config/packages/prod/doctrine.yaml",
+            "./src/Entity/.gitignore",
+            "./src/Repository/.gitignore"
         ]
     },
     "doctrine/doctrine-migrations-bundle": {
@@ -47,8 +47,8 @@
             "ref": "c1431086fec31f17fbcfe6d6d7e92059458facc1"
         },
         "files": [
-            "config/packages/doctrine_migrations.yaml",
-            "src/Migrations/.gitignore"
+            "./config/packages/doctrine_migrations.yaml",
+            "./src/Migrations/.gitignore"
         ]
     },
     "doctrine/event-manager": {
@@ -103,10 +103,10 @@
         "version": "1.5.1"
     },
     "ocramius/proxy-manager": {
-        "version": "2.5.0"
+        "version": "2.2.3"
     },
     "php": {
-        "version": "7.4"
+        "version": "7.3"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.0.0"
