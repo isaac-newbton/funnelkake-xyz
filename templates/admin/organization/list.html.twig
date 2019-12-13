@@ -8,7 +8,7 @@
             {% if ( organizations is defined ) and (organizations > -1 ) %}
             <ul>
                 {% for organization in organizations %}
-                <li>{{ organization.name }} <a href="{{ path("organization_edit", {id: organization.id}) }}">Edit</a></li>
+                <li>{{ organization.name }} <a href="{{ path("organizations_edit", {id: organization.id}) }}">Edit</a></li>
                 {% endfor %}
             </ul>
             {% endif %}

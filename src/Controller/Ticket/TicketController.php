@@ -15,7 +15,7 @@ use App\Entity\User;
 class TicketController extends AbstractController {
 
     /**
-     * @Route("/tickets/submit", name="ticket_form")
+     * @Route("/tickets/submit", name="tickets_form")
      */
     public function ticketSubmit(Request $request){
         $ticket = new Ticket();
@@ -72,19 +72,19 @@ class TicketController extends AbstractController {
     }
 
     /**
-     * @Route("/tickets/received", name="ticket_received")
+     * @Route("/tickets/received", name="tickets_received")
      */
     public function ticketReceived(){
         return new Response("received");
     }
 
     /**
-     * @Route("/tickets/view", name="ticket_list")
-     * @
+     * @Route("/tickets/view", name="tickets_list")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function ticketList(){
         $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findAll();
-        return $this->render("ticket/list.html.twig", [
+        return $this->render("admin/ticket/list.html.twig", [
             "tickets" => $tickets
         ]);
     }

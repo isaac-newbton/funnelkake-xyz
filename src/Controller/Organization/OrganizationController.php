@@ -17,7 +17,7 @@ use App\Form\Type\OrganizationType;
 class OrganizationController extends abstractController {
 
     /**
-     * @Route("/organizations", name="organization_list")
+     * @Route("/organizations/view", name="organizations_list")
      */
     public function getOrganizations(){
         $organizations = $this->getDoctrine()->getRepository(Organization::class)->findAll();
@@ -27,7 +27,7 @@ class OrganizationController extends abstractController {
     }
 
     /**
-     * @Route("/organizations/{id}", name="organization_single", requirements={"id"="\d+"})
+     * @Route("/organizations/view/{id}", name="organizations_single", requirements={"id"="\d+"})
      */
     public function getSingleOrganization(int $id){
         return new Response("list single org by id: $id");
@@ -52,13 +52,13 @@ class OrganizationController extends abstractController {
             return $this->redirectToRoute("organization_list");
         }
 
-        return $this->render("/admin/organization/add.html.twig", [
+        return $this->render("/admin/organization/form.html.twig", [
             'form' => $form->createView()
         ]);
     }
 
     /**
-     * @Route("/organizations/edit/{id}", name="organization_edit", requirements={"id"="\d+"})
+     * @Route("/organizations/edit/{id}", name="organizations_edit", requirements={"id"="\d+"})
      */
     public function editOrganization(int $id, Request $request){
         // show edit by id or by entity ???
@@ -77,14 +77,14 @@ class OrganizationController extends abstractController {
              return $this->redirectToRoute("organization_list");
          }
  
-         return $this->render("/admin/organization/edit.html.twig", [
+         return $this->render("/admin/organization/form.html.twig", [
              'form' => $form->createView(),
              'organization' => $organization
          ]);
     }
 
     /**
-     * @Route("/organizations/delete/{id}", name="organization_delete", requirements={"id"="\d+"})
+     * @Route("/organizations/delete/{id}", name="organizations_delete", requirements={"id"="\d+"})
      */
     public function deleteOrganization(int $id){
         // show edit by id or by entity ???

@@ -1,0 +1,28 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row my-3">
+        <div class="col">
+            <a href="{{path("users_add")}}" class="btn btn-primary">Add New</a>
+        </div>
+    </div>
+    <div class="row my-3">
+        <div class="col">
+            {% if (users is defined) and (users > 0) %}
+            <ul class="list-group">
+                {% for user in users %}
+                <li class="list-group-item">
+                    {{ user.email}} | {{user.organization.name|default(null)}}
+                    <div class="btn-group float-right">
+                        <a href="{{ path("users_edit", {id : user.id}) }}" class="btn btn-link">Edit</a>
+                        <a href="{{ path("users_delete", {id : user.id}) }}" class="btn btn-link text-danger">Delete</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+                {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
