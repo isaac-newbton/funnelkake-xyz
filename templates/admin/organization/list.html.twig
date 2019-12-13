@@ -1,0 +1,20 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+<div class="container">
+    <div class="row py-5">
+        <div class="col">
+            <a href={{ path("organization_add") }} class="btn btn-primary">Add New</a>
+            {% if ( organizations is defined ) and (organizations > -1 ) %}
+            <ul>
+                {% for organization in organizations %}
+                <li>{{ organization.name }} <a href="{{ path("organizations_edit", {id: organization.id}) }}">Edit</a></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
