@@ -48,6 +48,11 @@ class Ticket
      */
     private $email;
 
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $raw_json = [];
+
     public function __construct()
     {
         $this->comment = new ArrayCollection();
@@ -145,6 +150,18 @@ class Ticket
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getRawJson(): ?array
+    {
+        return $this->raw_json;
+    }
+
+    public function setRawJson(?array $raw_json): self
+    {
+        $this->raw_json = $raw_json;
 
         return $this;
     }
