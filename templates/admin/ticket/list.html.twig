@@ -16,7 +16,7 @@
                 </div>
                 <div class="card-body">
                     <h5 class="card-title"><a href="#">{{ticket.subject}}</a></h5>
-                    <p>{{ticket.content}}</p>
+                    {{ticket.content|raw}}
                 </div>
                 <div class="card-footer">
                     <span class="float-right">
