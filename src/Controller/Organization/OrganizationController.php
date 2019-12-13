@@ -34,7 +34,7 @@ class OrganizationController extends abstractController {
     }
 
     /**
-     * @Route("/organizations/add", name="organization_add")
+     * @Route("/organizations/add", name="organizations_add")
      */
     public function addOrganization(Request $request ){
         $organization = new Organization();
@@ -49,7 +49,7 @@ class OrganizationController extends abstractController {
             $entityManager->persist($organization);
             $entityManager->flush();
 
-            return $this->redirectToRoute("organization_list");
+            return $this->redirectToRoute("organizations_list");
         }
 
         return $this->render("/admin/organization/form.html.twig", [
@@ -74,7 +74,7 @@ class OrganizationController extends abstractController {
              $entityManager->persist($organization);
              $entityManager->flush();
  
-             return $this->redirectToRoute("organization_list");
+             return $this->redirectToRoute("organizations_list");
          }
  
          return $this->render("/admin/organization/form.html.twig", [
@@ -93,6 +93,6 @@ class OrganizationController extends abstractController {
         $entityManager->remove($organization);
         $entityManager->flush();
 
-        return $this->redirectToRoute("organization_list");
+        return $this->redirectToRoute("organizations_list");
     }
 }
