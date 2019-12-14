@@ -34,11 +34,6 @@ class Ticket
     private $subject;
 
     /**
-     * @ORM\Column(type="text")
-     */
-    private $content;
-
-    /**
      * @ORM\Column(type="datetime")
      */
     private $timestamp;
@@ -109,18 +104,6 @@ class Ticket
     public function setSubject(string $subject): self
     {
         $this->subject = $subject;
-
-        return $this;
-    }
-
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(string $content): self
-    {
-        $this->content = $content;
 
         return $this;
     }

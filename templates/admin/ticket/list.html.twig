@@ -15,10 +15,10 @@
                     </span>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title"><a href="#">{{ticket.subject}}</a></h5>
-                    <p>{{ticket.content}}</p>
-                </div>
-                <div class="card-footer">
+                    <h5 class="card-title">
+                        <a href="{{ path("tickets_single", {id: ticket.id}) }}">{{ticket.subject}}</a>
+                        <span class="badge badge-primary badge-pill">{{ ticket.comment|length}}</span>
+                    </h5>
                     <span class="float-right">
                     {% if ticket.organization.name is defined %}
                     {{ticket.organization.name}}

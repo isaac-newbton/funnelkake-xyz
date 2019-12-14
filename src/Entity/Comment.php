@@ -18,7 +18,6 @@ class Comment
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="comments")
-     * @ORM\JoinColumn(nullable=false)
      */
     private $user;
 
@@ -31,6 +30,16 @@ class Comment
      * @ORM\ManyToOne(targetEntity="App\Entity\Task", inversedBy="comment")
      */
     private $task;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $content;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $timestamp;
 
     public function getId(): ?int
     {
@@ -69,6 +78,30 @@ class Comment
     public function setTask(?Task $task): self
     {
         $this->task = $task;
+
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(string $content): self
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function getTimestamp(): ?\DateTimeInterface
+    {
+        return $this->timestamp;
+    }
+
+    public function setTimestamp(\DateTimeInterface $timestamp): self
+    {
+        $this->timestamp = $timestamp;
 
         return $this;
     }
