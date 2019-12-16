@@ -14,12 +14,14 @@ use App\Entity\Organization;
 use App\Entity\User;
 use App\Form\Type\Comment\CommentType;
 
+use App\Service\Timestamp\TimestampHandler;
+
 class TicketController extends AbstractController {
 
     /**
      * @Route("/tickets/submit", name="tickets_form")
      */
-    public function ticketSubmit(Request $request){
+    public function ticketSubmit(Request $request, TimestampHandler $timestamp){
         $ticket = new Ticket();
         $form = $this->createForm(TicketType::class, $ticket);
 
@@ -52,17 +54,12 @@ class TicketController extends AbstractController {
             $comment = new Comment();
             $comment->setContent($form->get('comment')->getData());
             $comment->setUser($this->getUser() ?? null);
+            $comment->setTimestamp($timestamp->createTimestamp());
+
 
             $ticket = $form->getData();
             $ticket->addComment($comment);
-             
-            // set the timestamp
-            $datetime = new \DateTime();
-            $timezone = new \DateTimeZone('America/New_York');
-            $datetime->setTimezone($timezone);
-
-            $ticket->setTimestamp($datetime);
-            $comment->setTimestamp($datetime);
+            $ticket->setTimestamp($timestamp->createTimestamp());
 
             $entityManager =  $this->getDoctrine()->getManager();
             $entityManager->persist($ticket);
@@ -101,7 +98,7 @@ class TicketController extends AbstractController {
      * @Route("tickets/view/{id}", name="tickets_single")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function viewTicket(int $id, Request $request){
+    public function viewTicket(int $id, Request $request, TimestampHandler $timestamp){
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         $comment = new Comment();
         $form = $this->createForm(CommentType::class, $comment);
@@ -118,11 +115,7 @@ class TicketController extends AbstractController {
             $comment = $form->getData();
             $comment->setUser($this->getUser());
             $comment->setTicket($ticket);
-
-            $datetime = new \DateTime();
-            $timezone = new \DateTimeZone('America/New_York');
-            $datetime->setTimezone($timezone);
-            $comment->setTimestamp($datetime);
+            $comment->setTimestamp($timestamp->createTimestamp());
 
             $entityManager->persist($comment);
             $entityManager->flush();
