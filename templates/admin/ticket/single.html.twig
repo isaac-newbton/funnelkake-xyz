@@ -1,0 +1,49 @@
+{% extends "base.html.twig" %}
+{% block body %}
+<div class="container">
+    <div class="row my-3">
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header">{{ ticket.email }} {{ticket.organization.name|default(null)}}</h5>
+                <div class="card-body">
+                    {{ ticket.subject }} 
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-1">
+        <div class="col">
+            <div class="btn-group">
+                <button class="btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    Add Reply
+                  </button>
+                <a href="#" class="btn btn-sm btn-secondary">Close Ticket</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="collapse py-5" id="collapseExample">
+                    {{ form_start(form) }}
+                    {{ form_row(form.content, { label: "Reply" })}}
+                    <input type="submit" class="btn btn-primary" value="Submit">
+                    {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    {% for comment in ticket.comment|reverse %}
+    <div class="row my-3">
+        <div class="col">
+            <div class="card bg-white">
+                <div class="card-body">
+                    <p class="muted">{{ comment.user.email|default(null)}} {{ comment.timestamp|date('d/m/Y h:i A')}}</p>
+                    {{ comment.content }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

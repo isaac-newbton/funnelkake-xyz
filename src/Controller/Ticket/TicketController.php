@@ -8,9 +8,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 use App\Form\Type\Ticket\TicketType;
+use App\Entity\Comment;
 use App\Entity\Ticket;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Form\Type\Comment\CommentType;
 
 class TicketController extends AbstractController {
 
@@ -23,9 +25,6 @@ class TicketController extends AbstractController {
 
         $form->handleRequest($request);
         if ( $form->isSubmitted() && $form->isValid() ){
-
-            $ticket = $form->getData();
-            
             // set the tickets organization
             if ($this->getUser()){
                 // user is logged in already - just use their email
@@ -49,6 +48,13 @@ class TicketController extends AbstractController {
                 }
                 $ticket->setOrganization($organization ?? null); // $organization can still be null at this point - thats ok!
             }
+
+            $comment = new Comment();
+            $comment->setContent($form->get('comment')->getData());
+            $comment->setUser($this->getUser() ?? null);
+
+            $ticket = $form->getData();
+            $ticket->addComment($comment);
              
             // set the timestamp
             $datetime = new \DateTime();
@@ -56,12 +62,14 @@ class TicketController extends AbstractController {
             $datetime->setTimezone($timezone);
 
             $ticket->setTimestamp($datetime);
+            $comment->setTimestamp($datetime);
 
             $entityManager =  $this->getDoctrine()->getManager();
             $entityManager->persist($ticket);
+            $entityManager->persist($comment);
             $entityManager->flush();
 
-            return $this->redirectToRoute("ticket_received", [
+            return $this->redirectToRoute("tickets_received", [
                 "ticket" => $ticket
             ]);
         }
@@ -79,13 +87,52 @@ class TicketController extends AbstractController {
     }
 
     /**
-     * @Route("/tickets/view", name="tickets_list")
+     * @Route("/tickets/list", name="tickets_list")
      * @IsGranted("ROLE_ADMIN")
      */
     public function ticketList(){
         $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findAll();
         return $this->render("admin/ticket/list.html.twig", [
             "tickets" => $tickets
+        ]);
+    }
+
+    /**
+     * @Route("tickets/view/{id}", name="tickets_single")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function viewTicket(int $id, Request $request){
+        $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+
+        $form->remove("ticket");
+        $form->remove("timestamp");
+        $form->remove("task");
+        $form->remove("user");
+
+        $form->handleRequest($request);
+
+        if ($form ->isSubmitted() && $form->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+            $comment = $form->getData();
+            $comment->setUser($this->getUser());
+            $comment->setTicket($ticket);
+
+            $datetime = new \DateTime();
+            $timezone = new \DateTimeZone('America/New_York');
+            $datetime->setTimezone($timezone);
+            $comment->setTimestamp($datetime);
+
+            $entityManager->persist($comment);
+            $entityManager->flush();
+
+            return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
+        }
+
+        return $this->render("admin/ticket/single.html.twig", [
+            "ticket" => $ticket,
+            "form" => $form->createView()
         ]);
     }
 }
