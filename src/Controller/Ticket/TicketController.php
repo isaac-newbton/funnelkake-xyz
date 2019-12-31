@@ -103,10 +103,10 @@ class TicketController extends AbstractController {
         ]);
 
         $form = $ticketOrganizationForm->handleRequest($request);
+        // TODO: refactor this nasy bit at some point...
         if ($form->isSubmitted() && $form->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
 
-            // TODO: refactor this nasy bit at some point...
             $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($form->get('ticket')->getData()));
             $organization = $form->get('organization')->getData();
 
@@ -133,7 +133,6 @@ class TicketController extends AbstractController {
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         $comment = new Comment();
         $form = $this->createForm(CommentType::class, $comment);
-
         $form->remove("ticket");
         $form->remove("timestamp");
         $form->remove("task");
