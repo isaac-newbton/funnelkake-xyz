@@ -15,6 +15,8 @@ use App\Entity\User;
 use App\Form\Type\Comment\CommentType;
 
 use App\Service\Timestamp\TimestampHandler;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class TicketController extends AbstractController {
 
@@ -87,10 +89,39 @@ class TicketController extends AbstractController {
      * @Route("/tickets/list", name="tickets_list")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function ticketList(){
+    public function ticketList(Request $request){
         $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findAll();
+        $ticketOrganizationForm = $this->createForm(TicketType::class);
+        $ticketOrganizationForm->add('organization', EntityType::class, [
+            'class' => Organization::class,
+            'choice_label' => function ($o) {
+                return $o->getName();
+            }
+        ]);
+        $ticketOrganizationForm->add('ticket', HiddenType::class, [
+            "mapped" => false,
+        ]);
+
+        $form = $ticketOrganizationForm->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+
+            // TODO: refactor this nasy bit at some point...
+            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($form->get('ticket')->getData()));
+            $organization = $form->get('organization')->getData();
+
+            if ($ticket && $organization) {
+                $ticket->setOrganization($organization);
+                $entityManager->persist($ticket);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute("tickets_list");
+        }
+
         return $this->render("admin/ticket/list.html.twig", [
-            "tickets" => $tickets
+            "tickets" => $tickets,
+            "ticketOrganizationForm" => $ticketOrganizationForm->createView()
         ]);
     }
 
