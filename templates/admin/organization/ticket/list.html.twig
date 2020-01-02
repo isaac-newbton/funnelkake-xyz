@@ -30,8 +30,6 @@
                     <span class="float-right">
                     {% if ticket.organization.name is defined %}
                     {{ticket.organization.name}}
-                    {% else %}
-                    <button class="assign-ticket btn btn-link" data-ticket="{{ticket.id}}" data-toggle="modal" data-target="#ticket-organization-modal">Assign Organization</button>
                     {% endif %}
                     </span>
                 </div>
@@ -40,36 +38,5 @@
         </div>
     </div>
 </div>
-
-<!-- ticket-organization-modal -->
-<div class="modal fade" id="ticket-organization-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Assign Organization</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                {{ form_start(ticketOrganizationForm) }}
-                {{ form_row(ticketOrganizationForm.ticket|default(null))}}
-                {{ form_row(ticketOrganizationForm.organization|default(null))}}
-                {{ form_row(ticketOrganizationForm.submit)}}
-                {{ form_widget(ticketOrganizationForm._token)}}
-                {{ form_end(ticketOrganizationForm, {render_rest: false})}}
-            </div>
-        </div>
-    </div>
-</div>
-
-{# ugly js goes here until we find a better way to handle it #}
-<script>
-    jQuery(document).ready(function($){
-        $(".assign-ticket").click(function(){
-            $('input[name="ticket[ticket]"]').prop('value', $(this).data('ticket'))
-        })
-    })
-</script>
 
 {% endblock %}
