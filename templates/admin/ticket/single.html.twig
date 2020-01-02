@@ -20,7 +20,11 @@
                 <button class="btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                     Add Reply
                   </button>
-                <a href="#" class="btn btn-sm btn-secondary">Close Ticket</a>
+                  {% if ticket.getStatusText == 'closed' %}
+                      <a href="{{ path("tickets_open", {id: ticket.id}) }}" class="btn btn-sm btn-success">Reopen Ticket</a>
+                  {% else %}
+                  <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-sm btn-secondary">Close Ticket</a>
+                  {% endif %}
             </div>
         </div>
     </div>
