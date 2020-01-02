@@ -96,7 +96,6 @@ class TicketController extends AbstractController {
         ],[
             "status" => "ASC"
         ]);
-
         $ticketOrganizationForm = $this->createForm(TicketType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
             'class' => Organization::class,
