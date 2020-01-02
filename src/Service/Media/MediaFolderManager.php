@@ -10,7 +10,7 @@ class MediaFolderManager{
 	private $mediaFilesDir;
 
 	public function __construct($mediaFilesDir){
-		$this->medaFilesDir = $mediaFilesDir;
+		$this->mediaFilesDir = $mediaFilesDir;
 	}
 
 	public function path(?DateTimeInterface $dt){
