@@ -102,13 +102,13 @@ class TicketController extends AbstractController {
             "mapped" => false,
         ]);
 
-        $form = $ticketOrganizationForm->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()){
+        $ticketOrganizationForm->handleRequest($request);
+        // TODO: refactor this nasy bit at some point...
+        if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
 
-            // TODO: refactor this nasy bit at some point...
-            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($form->get('ticket')->getData()));
-            $organization = $form->get('organization')->getData();
+            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
+            $organization = $ticketOrganizationForm->get('organization')->getData();
 
             if ($ticket && $organization) {
                 $ticket->setOrganization($organization);
@@ -132,18 +132,16 @@ class TicketController extends AbstractController {
     public function viewTicket(int $id, Request $request, TimestampHandler $timestamp){
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         $comment = new Comment();
-        $form = $this->createForm(CommentType::class, $comment);
+        $commentForm = $this->createForm(CommentType::class, $comment);
+        $commentForm->remove("ticket");
+        $commentForm->remove("timestamp");
+        $commentForm->remove("task");
+        $commentForm->remove("user");
 
-        $form->remove("ticket");
-        $form->remove("timestamp");
-        $form->remove("task");
-        $form->remove("user");
-
-        $form->handleRequest($request);
-
-        if ($form ->isSubmitted() && $form->isValid()){
+        $commentForm->handleRequest($request);
+        if ($commentForm ->isSubmitted() && $commentForm->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
-            $comment = $form->getData();
+            $comment = $commentForm->getData();
             $comment->setUser($this->getUser());
             $comment->setTicket($ticket);
             $comment->setTimestamp($timestamp->createTimestamp());
@@ -154,9 +152,37 @@ class TicketController extends AbstractController {
             return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
         }
 
+        $ticketOrganizationForm = $this->createForm(TicketType::class);
+        $ticketOrganizationForm->add('organization', EntityType::class, [
+            'class' => Organization::class,
+            'choice_label' => function ($o) {
+                return $o->getName();
+            }
+        ]);
+        $ticketOrganizationForm->add('ticket', HiddenType::class, [
+            "mapped" => false,
+        ]);
+
+        $ticketOrganizationForm->handleRequest($request);
+        // TODO: refactor this nasy bit at some point...
+        if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+
+            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
+            $organization = $ticketOrganizationForm->get('organization')->getData();
+
+            if ($ticket && $organization) {
+                $ticket->setOrganization($organization);
+                $entityManager->persist($ticket);
+                $entityManager->flush();
+            }
+            // return $this->redirectToRoute("tickets_list");
+        }
+
         return $this->render("admin/ticket/single.html.twig", [
             "ticket" => $ticket,
-            "form" => $form->createView()
+            "commentForm" => $commentForm->createView(),
+            "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
         ]);
     }
 }
