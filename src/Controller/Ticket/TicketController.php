@@ -89,7 +89,53 @@ class TicketController extends AbstractController {
      * @IsGranted("ROLE_ADMIN")
      */
     public function ticketList(Request $request){
-        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findAll();
+        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy([
+            "status" => !Ticket::STATUS_CLOSED
+        ],[
+            "status" => "ASC"
+        ]);
+        $ticketOrganizationForm = $this->createForm(TicketType::class);
+        $ticketOrganizationForm->add('organization', EntityType::class, [
+            'class' => Organization::class,
+            'choice_label' => function ($o) {
+                return $o->getName();
+            }
+        ]);
+        $ticketOrganizationForm->add('ticket', HiddenType::class, [
+            "mapped" => false,
+        ]);
+
+        $ticketOrganizationForm->handleRequest($request);
+        // TODO: refactor this nasy bit at some point...
+        if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+
+            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
+            $organization = $ticketOrganizationForm->get('organization')->getData();
+
+            if ($ticket && $organization) {
+                $ticket->setOrganization($organization);
+                $entityManager->persist($ticket);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute("tickets_list");
+        }
+
+        return $this->render("admin/ticket/list.html.twig", [
+            "tickets" => $tickets,
+            "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
+        ]);
+    }
+    
+    /**
+     * @Route("/tickets/list/closed", name="tickets_list_closed")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function ticketListClosed(Request $request){
+        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy([
+            "status" => Ticket::STATUS_CLOSED
+        ]);
         $ticketOrganizationForm = $this->createForm(TicketType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
             'class' => Organization::class,

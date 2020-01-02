@@ -2,7 +2,15 @@
 
 {% block body %}
 <div class="container">
-    <div class="row">
+    <div class="row my-3">
+        <div class="col">
+            <div class="btn-group">
+                <a href="{{ path("tickets_list") }}" class="btn btn-primary">Open</a>
+                <a href="{{ path("tickets_list_closed") }}" class="btn btn-secondary">Closed</a>
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
         <div class="col">
         {% for ticket in tickets %}
             <div class="card my-3">
