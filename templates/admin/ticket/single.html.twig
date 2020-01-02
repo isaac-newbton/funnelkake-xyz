@@ -9,7 +9,10 @@
             <div class="card">
                 <div class="card-header">
                     <span class="badge badge-dark">{{ ticket.email }}</span>
-                    <strong class="float-right">{{ticket.organization.name ?? assignOrganization|raw }}</strong>
+                    <span class="float-right">
+                        <strong>{{ticket.organization.name ?? assignOrganization|raw }}</strong>
+                        <span>{{ ticket.getStatusText|default('open') }}</span>
+                    </span>
                 </div>
                 <div class="card-body">
                     {{ ticket.subject }} 
@@ -26,7 +29,7 @@
                   {% if ticket.getStatusText == 'closed' %}
                       <a href="{{ path("tickets_open", {id: ticket.id}) }}" class="btn btn-sm btn-success">Reopen Ticket</a>
                   {% else %}
-                  <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-sm btn-secondary">Close Ticket</a>
+                  <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-sm btn-secondary" onclick="return confirm('Are you sure you want to close this ticket?')">Close Ticket</a>
                   {% endif %}
             </div>
         </div>
