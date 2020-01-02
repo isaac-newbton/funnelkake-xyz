@@ -17,3 +17,7 @@
 ###> vscode workspace settings ###
 /.vscode/
 ###< vscode workspace settings ###
+
+###> custom app settings ###
+/public/app-media/*
+###< custom app settings ###

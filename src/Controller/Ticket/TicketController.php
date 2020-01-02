@@ -16,6 +16,7 @@ use App\Form\Type\Comment\CommentType;
 
 use App\Service\Timestamp\TimestampHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class TicketController extends AbstractController {
@@ -89,7 +90,7 @@ class TicketController extends AbstractController {
      * @Route("/tickets/list", name="tickets_list")
      * @IsGranted("ROLE_ADMIN")
      */
-    public function ticketList(Request $request){
+    public function ticketList(Request $request, ParameterBagInterface $params){
         $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findAll();
         $ticketOrganizationForm = $this->createForm(TicketType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
@@ -121,7 +122,8 @@ class TicketController extends AbstractController {
 
         return $this->render("admin/ticket/list.html.twig", [
             "tickets" => $tickets,
-            "ticketOrganizationForm" => $ticketOrganizationForm->createView()
+            "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
+            "filePath" => $params->get('app.media_files_dir')
         ]);
     }
 

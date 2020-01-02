@@ -33,9 +33,15 @@ class Task
      */
     private $comment;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\MediaFile", mappedBy="task")
+     */
+    private $mediaFiles;
+
     public function __construct()
     {
         $this->comment = new ArrayCollection();
+        $this->mediaFiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -93,6 +99,34 @@ class Task
             if ($comment->getTask() === $this) {
                 $comment->setTask(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|MediaFile[]
+     */
+    public function getMediaFiles(): Collection
+    {
+        return $this->mediaFiles;
+    }
+
+    public function addMediaFile(MediaFile $mediaFile): self
+    {
+        if (!$this->mediaFiles->contains($mediaFile)) {
+            $this->mediaFiles[] = $mediaFile;
+            $mediaFile->addTask($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMediaFile(MediaFile $mediaFile): self
+    {
+        if ($this->mediaFiles->contains($mediaFile)) {
+            $this->mediaFiles->removeElement($mediaFile);
+            $mediaFile->removeTask($this);
         }
 
         return $this;
