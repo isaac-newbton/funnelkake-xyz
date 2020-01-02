@@ -7,7 +7,10 @@
     <div class="row my-3">
         <div class="col">
             <div class="card">
-                <h5 class="card-header">{{ ticket.email }} <strong class="float-right">{{ticket.organization.name ?? assignOrganization|raw }}</strong></h5>
+                <div class="card-header">
+                    <span class="badge badge-dark">{{ ticket.email }}</span>
+                    <strong class="float-right">{{ticket.organization.name ?? assignOrganization|raw }}</strong>
+                </div>
                 <div class="card-body">
                     {{ ticket.subject }} 
                 </div>
@@ -44,9 +47,12 @@
     <div class="row my-3">
         <div class="col">
             <div class="card bg-white">
+                <div class="card-header">
+                    <span class="badge badge-dark">{{ comment.user.email|default(null)}}</span>
+                </div>
                 <div class="card-body">
-                    <p class="muted">{{ comment.user.email|default(null)}} {{ comment.timestamp|date('d/m/Y h:i A')}}</p>
-                    {{ comment.content }}
+                    <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
+                    <p>{{ comment.content }}</p>
                 </div>
             </div>
         </div>
