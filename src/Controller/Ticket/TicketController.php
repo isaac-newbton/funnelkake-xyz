@@ -16,6 +16,7 @@ use App\Form\Type\Comment\CommentType;
 use App\Service\Ticket\TicketHandler;
 use App\Service\Timestamp\TimestampHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class TicketController extends AbstractController {
@@ -25,6 +26,7 @@ class TicketController extends AbstractController {
      */
     public function ticketSubmit(Request $request, TimestampHandler $timestamp){
         $ticket = new Ticket();
+        $ticket->setStatus(Ticket::STATUS_OPEN);
         $form = $this->createForm(TicketType::class, $ticket);
 
         $form->handleRequest($request);

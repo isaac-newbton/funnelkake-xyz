@@ -46,9 +46,15 @@ class Ticket
     const STATUS_CLOSED = 0;
     const STATUS_OPEN = 1;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\MediaFile", mappedBy="ticket")
+     */
+    private $mediaFiles;
+
     public function __construct()
     {
         $this->comment = new ArrayCollection();
+        $this->mediaFiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -131,6 +137,34 @@ class Ticket
     public function setStatus(?int $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|MediaFile[]
+     */
+    public function getMediaFiles(): Collection
+    {
+        return $this->mediaFiles;
+    }
+
+    public function addMediaFile(MediaFile $mediaFile): self
+    {
+        if (!$this->mediaFiles->contains($mediaFile)) {
+            $this->mediaFiles[] = $mediaFile;
+            $mediaFile->addTicket($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMediaFile(MediaFile $mediaFile): self
+    {
+        if ($this->mediaFiles->contains($mediaFile)) {
+            $this->mediaFiles->removeElement($mediaFile);
+            $mediaFile->removeTicket($this);
+        }
 
         return $this;
     }
