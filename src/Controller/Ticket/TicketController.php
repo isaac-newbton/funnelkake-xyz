@@ -96,6 +96,7 @@ class TicketController extends AbstractController {
         ],[
             "status" => "ASC"
         ]);
+
         $ticketOrganizationForm = $this->createForm(TicketType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
             'class' => Organization::class,
@@ -169,6 +170,18 @@ class TicketController extends AbstractController {
         return $this->render("admin/ticket/list.html.twig", [
             "tickets" => $tickets,
             "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/tickets/organization/{id}/list", name="tickets_list_organization", requirements={"id"="\d+"})
+     */
+    public function viewOrganizationTickets(int $id){
+        $organization = $this->getDoctrine()->getRepository(Organization::class)->find($id);
+        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy(["organization" => $organization]);
+
+        return $this->render("admin/organization/ticket/list.html.twig", [
+            "tickets" => $tickets
         ]);
     }
 
