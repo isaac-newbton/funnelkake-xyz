@@ -13,7 +13,7 @@ use App\Entity\Ticket;
 use App\Entity\Organization;
 use App\Entity\User;
 use App\Form\Type\Comment\CommentType;
-
+use App\Service\Ticket\TicketHandler;
 use App\Service\Timestamp\TimestampHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -61,7 +61,6 @@ class TicketController extends AbstractController {
 
             $ticket = $form->getData();
             $ticket->addComment($comment);
-            $ticket->setTimestamp($timestamp->createTimestamp());
 
             $entityManager =  $this->getDoctrine()->getManager();
             $entityManager->persist($ticket);
@@ -90,7 +89,11 @@ class TicketController extends AbstractController {
      * @IsGranted("ROLE_ADMIN")
      */
     public function ticketList(Request $request){
-        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findAll();
+        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy([
+            "status" => !Ticket::STATUS_CLOSED
+        ],[
+            "status" => "ASC"
+        ]);
         $ticketOrganizationForm = $this->createForm(TicketType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
             'class' => Organization::class,
@@ -121,7 +124,49 @@ class TicketController extends AbstractController {
 
         return $this->render("admin/ticket/list.html.twig", [
             "tickets" => $tickets,
-            "ticketOrganizationForm" => $ticketOrganizationForm->createView()
+            "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
+        ]);
+    }
+    
+    /**
+     * @Route("/tickets/list/closed", name="tickets_list_closed")
+     * @IsGranted("ROLE_ADMIN")
+     */
+    public function ticketListClosed(Request $request){
+        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy([
+            "status" => Ticket::STATUS_CLOSED
+        ]);
+        $ticketOrganizationForm = $this->createForm(TicketType::class);
+        $ticketOrganizationForm->add('organization', EntityType::class, [
+            'class' => Organization::class,
+            'choice_label' => function ($o) {
+                return $o->getName();
+            }
+        ]);
+        $ticketOrganizationForm->add('ticket', HiddenType::class, [
+            "mapped" => false,
+        ]);
+
+        $ticketOrganizationForm->handleRequest($request);
+        // TODO: refactor this nasy bit at some point...
+        if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+
+            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
+            $organization = $ticketOrganizationForm->get('organization')->getData();
+
+            if ($ticket && $organization) {
+                $ticket->setOrganization($organization);
+                $entityManager->persist($ticket);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute("tickets_list");
+        }
+
+        return $this->render("admin/ticket/list.html.twig", [
+            "tickets" => $tickets,
+            "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
         ]);
     }
 
@@ -184,5 +229,51 @@ class TicketController extends AbstractController {
             "commentForm" => $commentForm->createView(),
             "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/ticket/close/{id}", name="tickets_close", requirements={"id"="\d+"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function closeTicket(int $id, TimestampHandler $timestamp){
+        $entityManager = $this->getDoctrine()->getManager();
+        $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
+        if ($ticket){
+            $ticket->close();
+            $entityManager->persist($ticket);
+
+            $comment = new Comment();
+            $comment->setUser($this->getUser());
+            $comment->setTimestamp($timestamp->createTimestamp());
+            $comment->setTicket($ticket);
+            $comment->setContent("Ticket status set to {$ticket->getStatusText()}");
+            $entityManager->persist($comment);
+
+            $entityManager->flush();
+        }
+        return $this->redirectToRoute("tickets_list");
+    }
+
+    /**
+     * @Route("/ticket/open/{id}", name="tickets_open", requirements={"id"="\d+"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function openTicket(int $id, TimestampHandler $timestamp){
+        $entityManager = $this->getDoctrine()->getManager();
+        $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
+        if ($ticket){
+            $ticket->open();
+            $entityManager->persist($ticket);
+
+            $comment = new Comment();
+            $comment->setUser($this->getUser());
+            $comment->setTimestamp($timestamp->createTimestamp());
+            $comment->setTicket($ticket);
+            $comment->setContent("Ticket status set to {$ticket->getStatusText()}");
+            $entityManager->persist($comment);
+
+            $entityManager->flush();
+        }
+        return $this->redirectToRoute("tickets_list");
     }
 }

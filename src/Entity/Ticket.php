@@ -34,14 +34,17 @@ class Ticket
     private $subject;
 
     /**
-     * @ORM\Column(type="datetime")
-     */
-    private $timestamp;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $email;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $status;
+    
+    const STATUS_CLOSED = 0;
+    const STATUS_OPEN = 1;
 
     public function __construct()
     {
@@ -108,18 +111,6 @@ class Ticket
         return $this;
     }
 
-    public function getTimestamp(): ?\DateTimeInterface
-    {
-        return $this->timestamp;
-    }
-
-    public function setTimestamp(\DateTimeInterface $timestamp): self
-    {
-        $this->timestamp = $timestamp;
-
-        return $this;
-    }
-
     public function getEmail(): ?string
     {
         return $this->email;
@@ -129,6 +120,47 @@ class Ticket
     {
         $this->email = $email;
 
+        return $this;
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getStatusText(): string
+    {
+        switch ($this->status) {
+            case self::STATUS_CLOSED :
+                return "closed";
+            break;
+
+            case self::STATUS_OPEN :
+                return "open";
+            break;
+
+            default :
+                return "open";
+            break;
+        }
+    }
+
+    public function close(): self
+    {
+        $this->setStatus(self::STATUS_CLOSED);
+        return $this;
+    }
+
+    public function open(): self
+    {
+        $this->setStatus(self::STATUS_OPEN);
         return $this;
     }
 }
