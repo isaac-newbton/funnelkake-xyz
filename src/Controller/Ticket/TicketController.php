@@ -173,6 +173,18 @@ class TicketController extends AbstractController {
     }
 
     /**
+     * @Route("/tickets/organization/{id}/list", name="tickets_list_organization", requirements={"id"="\d+"})
+     */
+    public function viewOrganizationTickets(int $id){
+        $organization = $this->getDoctrine()->getRepository(Organization::class)->find($id);
+        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy(["organization" => $organization]);
+
+        return $this->render("admin/organization/ticket/list.html.twig", [
+            "tickets" => $tickets
+        ]);
+    }
+
+    /**
      * @Route("tickets/view/{id}", name="tickets_single")
      * @IsGranted("ROLE_ADMIN")
      */

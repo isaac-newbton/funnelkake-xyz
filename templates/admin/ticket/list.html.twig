@@ -29,7 +29,7 @@
                     </h5>
                     <span class="float-right">
                     {% if ticket.organization.name is defined %}
-                    {{ticket.organization.name}}
+                    <a href="{{ path("tickets_list_organization", {id: ticket.organization.id}) }}">{{ticket.organization.name}}</a>
                     {% else %}
                     <button class="assign-ticket btn btn-link" data-ticket="{{ticket.id}}" data-toggle="modal" data-target="#ticket-organization-modal">Assign Organization</button>
                     {% endif %}
