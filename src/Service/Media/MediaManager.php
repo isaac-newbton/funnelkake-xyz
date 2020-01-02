@@ -3,7 +3,7 @@ namespace App\Service\Media;
 
 use DateTimeInterface;
 
-class MediaFolderManager{
+class MediaManager{
 	/**
 	 * @var string
 	 */
