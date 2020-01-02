@@ -26,6 +26,7 @@ class TicketController extends AbstractController {
      */
     public function ticketSubmit(Request $request, TimestampHandler $timestamp){
         $ticket = new Ticket();
+        $ticket->setStatus(Ticket::STATUS_OPEN);
         $form = $this->createForm(TicketType::class, $ticket);
 
         $form->handleRequest($request);
