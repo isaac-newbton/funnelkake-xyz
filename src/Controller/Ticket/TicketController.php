@@ -179,8 +179,9 @@ class TicketController extends AbstractController {
         $organization = $this->getDoctrine()->getRepository(Organization::class)->find($id);
         $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy(["organization" => $organization]);
 
-        return $this->render("admin/organization/ticket/list.html.twig", [
-            "tickets" => $tickets
+        return $this->render("admin/ticket/list.html.twig", [
+            "tickets" => $tickets,
+            "organization" => $organization
         ]);
     }
 
