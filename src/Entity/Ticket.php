@@ -34,19 +34,22 @@ class Ticket
     private $subject;
 
     /**
-     * @ORM\Column(type="text")
-     */
-    private $content;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $timestamp;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $email;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $status;
+    
+    const STATUS_CLOSED = 0;
+    const STATUS_OPEN = 1;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\MediaFile", mappedBy="ticket")
+     */
+    private $mediaFiles;
 
     /**
      * @ORM\Column(type="json", nullable=true)
@@ -56,6 +59,7 @@ class Ticket
     public function __construct()
     {
         $this->comment = new ArrayCollection();
+        $this->mediaFiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -118,30 +122,6 @@ class Ticket
         return $this;
     }
 
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(string $content): self
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    public function getTimestamp(): ?\DateTimeInterface
-    {
-        return $this->timestamp;
-    }
-
-    public function setTimestamp(\DateTimeInterface $timestamp): self
-    {
-        $this->timestamp = $timestamp;
-
-        return $this;
-    }
-
     public function getEmail(): ?string
     {
         return $this->email;
@@ -154,6 +134,37 @@ class Ticket
         return $this;
     }
 
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|MediaFile[]
+     */
+    public function getMediaFiles(): Collection
+    {
+        return $this->mediaFiles;
+    }
+
+    public function addMediaFile(MediaFile $mediaFile): self
+    {
+        if (!$this->mediaFiles->contains($mediaFile)) {
+            $this->mediaFiles[] = $mediaFile;
+            $mediaFile->addTicket($this);
+        }
+
+        return $this;
+    }
+
+<<<<<<< HEAD
     public function getRawJson(): ?array
     {
         return $this->raw_json;
@@ -163,6 +174,44 @@ class Ticket
     {
         $this->raw_json = $raw_json;
 
+=======
+    public function removeMediaFile(MediaFile $mediaFile): self
+    {
+        if ($this->mediaFiles->contains($mediaFile)) {
+            $this->mediaFiles->removeElement($mediaFile);
+            $mediaFile->removeTicket($this);
+        }
+
+        return $this;
+    }
+
+    public function getStatusText(): string
+    {
+        switch ($this->status) {
+            case self::STATUS_CLOSED :
+                return "closed";
+            break;
+
+            case self::STATUS_OPEN :
+                return "open";
+            break;
+
+            default :
+                return "open";
+            break;
+        }
+    }
+
+    public function close(): self
+    {
+        $this->setStatus(self::STATUS_CLOSED);
+        return $this;
+    }
+
+    public function open(): self
+    {
+        $this->setStatus(self::STATUS_OPEN);
+>>>>>>> master
         return $this;
     }
 }

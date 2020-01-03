@@ -2,7 +2,16 @@
 
 {% block body %}
 <div class="container">
-    <div class="row">
+    <div class="row my-3">
+        <div class="col">
+            <div class="btn-group">
+            {# TODO: make this work when viewing organization ticket lists #}
+                <a href="{{ path("tickets_list") }}" class="btn btn-primary">Open</a>
+                <a href="{{ path("tickets_list_closed") }}" class="btn btn-secondary">Closed</a>
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
         <div class="col">
         {% for ticket in tickets %}
             <div class="card my-3">
@@ -10,20 +19,20 @@
                     <span>
                         {{ticket.email}}
                     </span>
-                    <span class="float-right">
-                        {{ ticket.timestamp|date('d/m/Y h:i A') }}
+                    <span class="float-right ticket-{{ticket.getStatusText}}">
+                        {{ticket.getStatusText}}
                     </span>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title"><a href="#">{{ticket.subject}}</a></h5>
-                    {{ticket.content|raw}}
-                </div>
-                <div class="card-footer">
+                    <h5 class="card-title">
+                        <a href="{{ path("tickets_single", {id: ticket.id}) }}">{{ticket.subject}}</a>
+                        <span class="badge badge-primary badge-pill">{{ ticket.comment|length}}</span>
+                    </h5>
                     <span class="float-right">
-                    {% if ticket.organization.name is defined %}
-                    {{ticket.organization.name}}
+                    {% if ticket.organization.id is defined %}
+                        <a href="{{ path("tickets_list_organization", {id: ticket.organization.id}) }}">{{ticket.organization.name}}</a>
                     {% else %}
-                    <a href="#" class="btn-link">Assign Organization</a>
+                        <button class="assign-ticket btn btn-link" data-ticket="{{ticket.id}}" data-toggle="modal" data-target="#ticket-organization-modal">Assign Organization</button>
                     {% endif %}
                     </span>
                 </div>
@@ -32,4 +41,38 @@
         </div>
     </div>
 </div>
+
+{% if organization is not defined %}
+    <!-- ticket-organization-modal -->
+    <div class="modal fade" id="ticket-organization-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Organization</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(ticketOrganizationForm) }}
+                    {{ form_row(ticketOrganizationForm.ticket)}}
+                    {{ form_row(ticketOrganizationForm.organization)}}
+                    {{ form_row(ticketOrganizationForm.submit)}}
+                    {{ form_widget(ticketOrganizationForm._token)}}
+                    {{ form_end(ticketOrganizationForm, {render_rest: false})}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ugly js goes here until we find a better way to handle it #}
+    <script>
+        jQuery(document).ready(function($){
+            $(".assign-ticket").click(function(){
+                $('input[name="ticket[ticket]"]').prop('value', $(this).data('ticket'))
+            })
+        })
+    </script>
+{% endif %}
+
 {% endblock %}
