@@ -27,6 +27,9 @@ class MediaManager{
 
 	public function __construct($mediaFilesDir){
 		$this->mediaFilesDir = $mediaFilesDir;
+		if(!is_dir($this->mediaFilesDir)){
+			mkdir($mediaFilesDir, 0755);
+		}
 		$this->mediaRelativePath = $this->relPath();
 		$this->currentPath = $this->path();
 	}
@@ -41,7 +44,7 @@ class MediaManager{
 		$dir = $this->mediaFilesDir . DIRECTORY_SEPARATOR . $this->mediaRelativePath;
 		if(!is_dir($dir)){
 			if(file_exists($dir)) unlink($dir);
-			if(!mkdir($dir, 0644, true)) return false;
+			if(!mkdir($dir, 0755, true)) return false;
 		}
 		return $dir;
 	}
@@ -58,6 +61,7 @@ class MediaManager{
 		}catch(FileException $e){
 			throw new \Exception("Failed to move $originalFilename into {$this->currentPath}");
 		}
+		chmod($newPath, 0644);
 		$mediaFile->setName($safeName);
 		$mediaFile->setPath($this->mediaRelativePath . DIRECTORY_SEPARATOR . $newFilename);
 		$mediaFile->setSize($size);
