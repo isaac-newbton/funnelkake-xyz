@@ -20,14 +20,25 @@ class MediaManager{
 	 */
 	private $currentPath;
 
+	/**
+	 * @var string
+	 */
+	private $mediaRelativePath;
+
 	public function __construct($mediaFilesDir){
 		$this->mediaFilesDir = $mediaFilesDir;
+		$this->mediaRelativePath = $this->relPath();
 		$this->currentPath = $this->path();
 	}
 
-	public function path(?DateTimeInterface $dt = null){
+	private function relPath(?DateTimeInterface $dt = null){
 		if(!isset($dt)) $dt = new \DateTime();
-		$dir = $this->mediaFilesDir . DIRECTORY_SEPARATOR . $dt->format('Y') . DIRECTORY_SEPARATOR . $dt->format('m');
+		return $dt->format('Y') . DIRECTORY_SEPARATOR . $dt->format('m');
+	}
+
+	private function path(?DateTimeInterface $dt = null){
+		if(!isset($dt)) $dt = new \DateTime();
+		$dir = $this->mediaFilesDir . DIRECTORY_SEPARATOR . $this->mediaRelativePath;
 		if(!is_dir($dir)){
 			if(file_exists($dir)) unlink($dir);
 			if(!mkdir($dir, 0644, true)) return false;
@@ -48,7 +59,7 @@ class MediaManager{
 			throw new \Exception("Failed to move $originalFilename into {$this->currentPath}");
 		}
 		$mediaFile->setName($safeName);
-		$mediaFile->setPath($newPath);
+		$mediaFile->setPath($this->mediaRelativePath . DIRECTORY_SEPARATOR . $newFilename);
 		$mediaFile->setSize($size);
 		$mediaFile->setMimeType($mimeType);
 		$mediaFile->setTimestamp(new \DateTime());
