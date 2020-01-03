@@ -5,6 +5,7 @@
     <div class="row my-3">
         <div class="col">
             <div class="btn-group">
+            {# TODO: make this work when viewing organization ticket lists #}
                 <a href="{{ path("tickets_list") }}" class="btn btn-primary">Open</a>
                 <a href="{{ path("tickets_list_closed") }}" class="btn btn-secondary">Closed</a>
             </div>
@@ -28,10 +29,10 @@
                         <span class="badge badge-primary badge-pill">{{ ticket.comment|length}}</span>
                     </h5>
                     <span class="float-right">
-                    {% if ticket.organization.name is defined %}
-                    <a href="{{ path("tickets_list_organization", {id: ticket.organization.id}) }}">{{ticket.organization.name}}</a>
+                    {% if ticket.organization.id is defined %}
+                        <a href="{{ path("tickets_list_organization", {id: ticket.organization.id}) }}">{{ticket.organization.name}}</a>
                     {% else %}
-                    <button class="assign-ticket btn btn-link" data-ticket="{{ticket.id}}" data-toggle="modal" data-target="#ticket-organization-modal">Assign Organization</button>
+                        <button class="assign-ticket btn btn-link" data-ticket="{{ticket.id}}" data-toggle="modal" data-target="#ticket-organization-modal">Assign Organization</button>
                     {% endif %}
                     </span>
                 </div>
@@ -41,35 +42,37 @@
     </div>
 </div>
 
-<!-- ticket-organization-modal -->
-<div class="modal fade" id="ticket-organization-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Assign Organization</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                {{ form_start(ticketOrganizationForm) }}
-                {{ form_row(ticketOrganizationForm.ticket)}}
-                {{ form_row(ticketOrganizationForm.organization)}}
-                {{ form_row(ticketOrganizationForm.submit)}}
-                {{ form_widget(ticketOrganizationForm._token)}}
-                {{ form_end(ticketOrganizationForm, {render_rest: false})}}
+{% if organization is not defined %}
+    <!-- ticket-organization-modal -->
+    <div class="modal fade" id="ticket-organization-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Organization</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(ticketOrganizationForm) }}
+                    {{ form_row(ticketOrganizationForm.ticket)}}
+                    {{ form_row(ticketOrganizationForm.organization)}}
+                    {{ form_row(ticketOrganizationForm.submit)}}
+                    {{ form_widget(ticketOrganizationForm._token)}}
+                    {{ form_end(ticketOrganizationForm, {render_rest: false})}}
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{# ugly js goes here until we find a better way to handle it #}
-<script>
-    jQuery(document).ready(function($){
-        $(".assign-ticket").click(function(){
-            $('input[name="ticket[ticket]"]').prop('value', $(this).data('ticket'))
+    {# ugly js goes here until we find a better way to handle it #}
+    <script>
+        jQuery(document).ready(function($){
+            $(".assign-ticket").click(function(){
+                $('input[name="ticket[ticket]"]').prop('value', $(this).data('ticket'))
+            })
         })
-    })
-</script>
+    </script>
+{% endif %}
 
 {% endblock %}
