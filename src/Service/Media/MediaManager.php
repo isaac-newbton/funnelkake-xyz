@@ -3,14 +3,14 @@ namespace App\Service\Media;
 
 use DateTimeInterface;
 
-class MediaFolderManager{
+class MediaManager{
 	/**
 	 * @var string
 	 */
 	private $mediaFilesDir;
 
 	public function __construct($mediaFilesDir){
-		$this->medaFilesDir = $mediaFilesDir;
+		$this->mediaFilesDir = $mediaFilesDir;
 	}
 
 	public function path(?DateTimeInterface $dt){
