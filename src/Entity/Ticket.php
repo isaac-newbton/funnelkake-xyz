@@ -51,11 +51,6 @@ class Ticket
      */
     private $mediaFiles;
 
-    /**
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $raw_json = [];
-
     public function __construct()
     {
         $this->comment = new ArrayCollection();
@@ -164,17 +159,6 @@ class Ticket
         return $this;
     }
 
-<<<<<<< HEAD
-    public function getRawJson(): ?array
-    {
-        return $this->raw_json;
-    }
-
-    public function setRawJson(?array $raw_json): self
-    {
-        $this->raw_json = $raw_json;
-
-=======
     public function removeMediaFile(MediaFile $mediaFile): self
     {
         if ($this->mediaFiles->contains($mediaFile)) {
@@ -211,7 +195,6 @@ class Ticket
     public function open(): self
     {
         $this->setStatus(self::STATUS_OPEN);
->>>>>>> master
         return $this;
     }
 }
