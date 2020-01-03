@@ -4,63 +4,101 @@
 
 {% block body %}
 <div class="container">
-    <div class="row my-3">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    <span class="badge badge-dark">{{ ticket.email }}</span>
-                    <span class="float-right">
-                        <strong>{{ticket.organization.name ?? assignOrganization|raw }}</strong>
-                        <span>{{ ticket.getStatusText|default('open') }}</span>
-                    </span>
-                </div>
-                <div class="card-body">
-                    {{ ticket.subject }} 
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row my-1">
-        <div class="col">
-            <div class="btn-group">
-                <button class="btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                    Add Reply
-                  </button>
-                  {% if ticket.getStatusText == 'closed' %}
-                      <a href="{{ path("tickets_open", {id: ticket.id}) }}" class="btn btn-sm btn-success">Reopen Ticket</a>
-                  {% else %}
-                  <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-sm btn-secondary" onclick="return confirm('Are you sure you want to close this ticket?')">Close Ticket</a>
-                  {% endif %}
-            </div>
-        </div>
-    </div>
-
     <div class="row">
-        <div class="col">
-            <div class="collapse py-5" id="collapseExample">
-                    {{ form_start(commentForm) }}
-                    {{ form_row(commentForm.content, { label: "Reply" })}}
-                    <input type="submit" class="btn btn-primary" value="Submit">
-                    {{ form_end(commentForm) }}
-            </div>
-        </div>
-    </div>
+        <div class="col-sm-12 col-md-9">
 
-    {% for comment in ticket.comment|reverse %}
-    <div class="row my-3">
-        <div class="col">
-            <div class="card bg-white">
-                <div class="card-header">
-                    <span class="badge badge-dark">{{ comment.user.email|default(null)}}</span>
-                </div>
-                <div class="card-body">
-                    <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
-                    <p>{{ comment.content }}</p>
+            <div class="row py-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="badge badge-dark">{{ ticket.email }}</span>
+                            <span class="float-right">
+                                <strong>{{ticket.organization.name ?? assignOrganization|raw }}</strong>
+                                <span>{{ ticket.getStatusText|default('open') }}</span>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            {{ ticket.subject }} 
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="btn-group">
+                        <button class="btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                            Add Reply
+                        </button>
+                        {% if ticket.getStatusText == 'closed' %}
+                            <a href="{{ path("tickets_open", {id: ticket.id}) }}" class="btn btn-sm btn-success">Reopen Ticket</a>
+                        {% else %}
+                        <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-sm btn-secondary" onclick="return confirm('Are you sure you want to close this ticket?')">Close Ticket</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row py-3">
+                <div class="col">
+                    <div class="collapse py-5" id="collapseExample">
+                            {{ form_start(commentForm) }}
+                            {{ form_row(commentForm.content, { label: "Reply" })}}
+                            <input type="submit" class="btn btn-primary" value="Submit">
+                            {{ form_end(commentForm) }}
+                    </div>
+                </div>
+            </div>
+
+            {% for comment in ticket.comment|reverse %}
+            <div class="row py-3">
+                <div class="col">
+                    <div class="card bg-white">
+                        <div class="card-header">
+                            <span class="badge badge-dark">{{ comment.user.email|default(null)}}</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
+                            <p>{{ comment.content }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-sm-12 col-md-3">
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="row py-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Assigned Staff</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>asdf</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if is_granted('ROLE_USER') %}
+            <div class="row py-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Organization User(s)</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>asdf</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
-    {% endfor %}
 </div>
 
 <!-- ticket-organization-modal -->
