@@ -28,23 +28,27 @@ class MediaFileController extends AbstractController{
 
 			/** @var UploadedFile $uploadedFile */
 			$uploadedFile = $form['file']->getData();
-			$mediaFile->setSize($uploadedFile->getSize());
-			$mediaFile->setMimeType($uploadedFile->getMimeType());
-			$originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-			$safeName = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
-			$newFilename = $safeName . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
-			try{
-				$newPath = $uploadedFile->move($this->getParameter('app.media_files_dir'), $newFilename);
-			}catch(FileException $e){
-				throw new \Exception("Failed to move $originalFilename to $newFilename");
+			$mediaManager->uploadToMediaFile($uploadedFile, $mediaFile);
+			if($name = $form['name']->getData()){
+				$mediaFile->setName($name);
 			}
+			// $mediaFile->setSize($uploadedFile->getSize());
+			// $mediaFile->setMimeType($uploadedFile->getMimeType());
+			// $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+			// $safeName = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
+			// $newFilename = $safeName . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
+			// try{
+			// 	$newPath = $uploadedFile->move($this->getParameter('app.media_files_dir'), $newFilename);
+			// }catch(FileException $e){
+			// 	throw new \Exception("Failed to move $originalFilename to $newFilename");
+			// }
 
-			if(!$name = $form['name']->getData()){
-				$name = $safeName;
-			}
-			$mediaFile->setName($name);
-			$mediaFile->setPath($newPath);
-			$mediaFile->setTimestamp(new \DateTime());
+			// if(!$name = $form['name']->getData()){
+			// 	$name = $safeName;
+			// }
+			// $mediaFile->setName($name);
+			// $mediaFile->setPath($newPath);
+			// $mediaFile->setTimestamp(new \DateTime());
 
 			$entityManager = $this->getDoctrine()->getManager();
 			$entityManager->persist($mediaFile);
