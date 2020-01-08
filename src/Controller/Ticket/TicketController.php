@@ -18,6 +18,7 @@ use App\Service\Timestamp\TimestampHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class TicketController extends AbstractController {
 
@@ -33,6 +34,7 @@ class TicketController extends AbstractController {
         if ( $form->isSubmitted() && $form->isValid() ){
             // set the tickets organization
             if ($this->getUser()){
+                // TODO: this block isn't working
                 // user is logged in already - just use their email
                 $organization = $this->getUser()->getOrganization();
             } else {
@@ -219,9 +221,18 @@ class TicketController extends AbstractController {
                 return $o->getName();
             }
         ]);
+        $ticketOrganizationForm->add('users', EntityType::class, [
+            'class' => User::class,
+            'choice_label' => function ($u) {
+                return $u->getEmail();
+            },
+            'multiple' => true,
+            'expanded' => true
+        ]);
         $ticketOrganizationForm->add('ticket', HiddenType::class, [
             "mapped" => false,
         ]);
+        $ticketOrganizationForm->add('submit', SubmitType::class);
 
         $ticketOrganizationForm->handleRequest($request);
         // TODO: refactor this nasy bit at some point...

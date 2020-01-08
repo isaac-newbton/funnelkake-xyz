@@ -91,7 +91,13 @@
                             <h5>Organization User(s)</h5>
                         </div>
                         <div class="card-body">
-                            <p>asdf</p>
+                        {% if (ticket.organization.users) is defined and (ticket.organization.users|length > 0) %}
+                            {{form_start(ticketOrganizationForm)}}
+                            {{form_widget(ticketOrganizationForm.users)}}
+                            {# TODO: make this ajax #}
+                            <input class='btn btn-sm btn-primary my-2' type="submit" value="Save">
+                            {{form_end(ticketOrganizationForm, {render_rest: false})}}
+                        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -115,7 +121,9 @@
                 {{ form_start(ticketOrganizationForm) }}
                 {{ form_row(ticketOrganizationForm.ticket)}}
                 {{ form_row(ticketOrganizationForm.organization)}}
-                {{ form_row(ticketOrganizationForm.submit)}}
+                <div class="form-row">
+                    <input class='btn-btn-primary' type="submit" value="Submit">
+                </div>
                 {{ form_widget(ticketOrganizationForm._token)}}
                 {{ form_end(ticketOrganizationForm, {render_rest: false})}}
             </div>
