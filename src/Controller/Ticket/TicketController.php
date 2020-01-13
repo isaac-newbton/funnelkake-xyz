@@ -195,6 +195,7 @@ class TicketController extends AbstractController {
      * @IsGranted("ROLE_ADMIN")
      */
     public function viewTicket(int $id, Request $request, TimestampHandler $timestamp){
+        $twig_forms = [];
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         $comment = new Comment();
         $commentForm = $this->createForm(CommentType::class, $comment);
@@ -215,8 +216,9 @@ class TicketController extends AbstractController {
             $entityManager->persist($comment);
             $entityManager->flush();
 
-            return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
+            // return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
         }
+        $twig_forms['commentForm'] = $commentForm->createView();
 
         $ticketOrganizationForm = $this->createForm(TicketOrganizationType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
@@ -236,12 +238,14 @@ class TicketController extends AbstractController {
             $ticketData = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
             $organization = $ticketOrganizationForm->get('organization')->getData();
 
-            if ($ticket && $organization) {
-                $ticket->setOrganization($organization);
+            if ($ticketData && $organization) {
+                $ticketData->setOrganization($organization);
                 $entityManager->persist($ticketData);
                 $entityManager->flush();
+                return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
             }
         }
+        $twig_forms['ticketOrganizationForm'] = $ticketOrganizationForm->createView();
 
         $ticketStaffForm = $this->createForm(TicketStaffType::class, $ticket);
         $ticketStaffForm->add('submit', SubmitType::class);
@@ -273,34 +277,45 @@ class TicketController extends AbstractController {
             $ticketData = $ticketStaffForm->getData();
             $entityManager->persist($ticketData);
             $entityManager->flush();
+            return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
         }
+        $twig_forms['ticketStaffForm'] = $ticketStaffForm->createView();
 
-        $ticketUsersForm = $this->createForm(TicketUsersType::class, $ticket);
-        $ticketUsersForm->add('users', EntityType::class, [
-            'class' => User::class,
-            'choices' => $ticket->getOrganization()->getUsers(),
-            'choice_label' => function ($u) {
-                return $u->getEmail();
-            },
-            'multiple' => true,
-            'expanded' => true
-        ]);
+        if ($ticket->getOrganization()){
+            $ticketUsersForm = $this->createForm(TicketUsersType::class, $ticket);
+            $ticketUsersForm->add('users', EntityType::class, [
+                'class' => User::class,
+                'choices' => $ticket->getOrganization()->getUsers(),
+                'choice_label' => function ($u) {
+                    return $u->getEmail();
+                },
+                'multiple' => true,
+                'expanded' => true
+            ]);
+            $ticketUsersForm->add('submit', SubmitType::class);
+            $twig_forms['ticketUsersForm'] = $ticketUsersForm->createView();
 
-        $ticketUsersForm->handleRequest($request);
-        if ($ticketUsersForm->isSubmitted() && $ticketUsersForm->isValid()){
-            $entityManager = $this->getDoctrine()->getManager();
-            $ticketData = $ticketUsersForm->getData();
-            $entityManager->persist($ticketData);
-            $entityManager->flush();
+            $ticketUsersForm->handleRequest($request);
+            if ($ticketUsersForm->isSubmitted() && $ticketUsersForm->isValid()){
+                $entityManager = $this->getDoctrine()->getManager();
+                $ticketData = $ticketUsersForm->getData();
+                $entityManager->persist($ticketData);
+                $entityManager->flush();
+                return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
+            }
         }
         
-        return $this->render("admin/ticket/single.html.twig", [
-            "ticket" => $ticket,
-            "commentForm" => $commentForm->createView(),
-            "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
-            "ticketStaffForm" => $ticketStaffForm->createView(),
-            "ticketUsersForm" => $ticketUsersForm->createView(),
-        ]);
+        $render_args = ["ticket" => $ticket];
+        return $this->render("admin/ticket/single.html.twig", array_merge($render_args, $twig_forms)
+        // [
+        //     // "ticket" => $ticket,
+        //     // "commentForm" => $commentForm->createView(),
+        //     // "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
+        //     // "ticketStaffForm" => $ticketStaffForm->createView(),
+        //     // // TODO: this fails if the ticket doesnt have an organization set
+        //     // "ticketUsersForm" => $ticketUsersForm->createView(),
+        // ]
+    );
     }
 
     /**
