@@ -76,7 +76,12 @@
                             <h5>Assigned Staff</h5>
                         </div>
                         <div class="card-body">
-                            <p>asdf</p>
+                        {% if (ticketStaffForm.users) is defined %}
+                            {# TODO: make this ajax #}
+                            {{form_start(ticketStaffForm)}}
+                            {{form_widget(ticketStaffForm.users)}}
+                            {{form_end(ticketStaffForm)}}
+                        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -92,11 +97,10 @@
                         </div>
                         <div class="card-body">
                         {% if (ticket.organization.users) is defined and (ticket.organization.users|length > 0) %}
-                            {{form_start(ticketOrganizationForm)}}
-                            {{form_widget(ticketOrganizationForm.users)}}
+                            {{form_start(ticketUsersForm)}}
+                            {{form_widget(ticketUsersForm.users)}}
                             {# TODO: make this ajax #}
-                            <input class='btn btn-sm btn-primary my-2' type="submit" value="Save">
-                            {{form_end(ticketOrganizationForm, {render_rest: false})}}
+                            {{form_end(ticketUsersForm)}}
                         {% endif %}
                         </div>
                     </div>
@@ -118,14 +122,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                {{ form_start(ticketOrganizationForm) }}
-                {{ form_row(ticketOrganizationForm.ticket)}}
-                {{ form_row(ticketOrganizationForm.organization)}}
-                <div class="form-row">
-                    <input class='btn-btn-primary' type="submit" value="Submit">
-                </div>
-                {{ form_widget(ticketOrganizationForm._token)}}
-                {{ form_end(ticketOrganizationForm, {render_rest: false})}}
+                {{ form(ticketOrganizationForm) }}
             </div>
         </div>
     </div>

@@ -12,13 +12,16 @@ use App\Entity\Comment;
 use App\Entity\Ticket;
 use App\Entity\Organization;
 use App\Entity\User;
+use App\Form\Type\Ticket\TicketStaffType;
 use App\Form\Type\Comment\CommentType;
-use App\Service\Ticket\TicketHandler;
+use App\Form\Type\Ticket\TicketOrganizationType;
+use App\Form\Type\Ticket\TicketUsersType;
 use App\Service\Timestamp\TimestampHandler;
+use App\Service\UserRole\UserRoleHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Security\Core\Role\RoleHierarchy;
 
 class TicketController extends AbstractController {
 
@@ -195,6 +198,7 @@ class TicketController extends AbstractController {
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         $comment = new Comment();
         $commentForm = $this->createForm(CommentType::class, $comment);
+        
         $commentForm->remove("ticket");
         $commentForm->remove("timestamp");
         $commentForm->remove("task");
@@ -214,24 +218,14 @@ class TicketController extends AbstractController {
             return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
         }
 
-        $ticketOrganizationForm = $this->createForm(TicketType::class);
+        $ticketOrganizationForm = $this->createForm(TicketOrganizationType::class);
         $ticketOrganizationForm->add('organization', EntityType::class, [
             'class' => Organization::class,
             'choice_label' => function ($o) {
                 return $o->getName();
             }
         ]);
-        $ticketOrganizationForm->add('users', EntityType::class, [
-            'class' => User::class,
-            'choice_label' => function ($u) {
-                return $u->getEmail();
-            },
-            'multiple' => true,
-            'expanded' => true
-        ]);
-        $ticketOrganizationForm->add('ticket', HiddenType::class, [
-            "mapped" => false,
-        ]);
+        $ticketOrganizationForm->add('ticket', HiddenType::class, ['mapped' => false]);
         $ticketOrganizationForm->add('submit', SubmitType::class);
 
         $ticketOrganizationForm->handleRequest($request);
@@ -239,21 +233,73 @@ class TicketController extends AbstractController {
         if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
 
-            $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
+            $ticketData = $this->getDoctrine()->getRepository(Ticket::class)->find(intval($ticketOrganizationForm->get('ticket')->getData()));
             $organization = $ticketOrganizationForm->get('organization')->getData();
 
             if ($ticket && $organization) {
                 $ticket->setOrganization($organization);
-                $entityManager->persist($ticket);
+                $entityManager->persist($ticketData);
                 $entityManager->flush();
             }
-            // return $this->redirectToRoute("tickets_list");
         }
 
+        $ticketStaffForm = $this->createForm(TicketStaffType::class, $ticket);
+        $ticketStaffForm->add('submit', SubmitType::class);
+        // TODO: This following 11 lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers() on the following ->add(['choice_label'])
+        $userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
+        $users = $this->getDoctrine()->getRepository(User::class)->findAll();
+        $staff_users = [];
+        foreach($users as $u){
+            foreach($u->getRoles() as $user_role){
+                if (in_array('ROLE_STAFF', $userRoleHandler->getInheritedRoles($user_role))){
+                    $staff_users[] = $u;
+                    continue;
+                }
+            }
+        }
+        $ticketStaffForm->add('users', EntityType::class, [
+            'class' => User::class,
+            'choices' => $staff_users,
+            'choice_label' => function ($u) {
+                return $u->getEmail();
+            },
+            'multiple' => true,
+            'expanded' => true
+        ]);
+
+        $ticketStaffForm->handleRequest($request);
+        if ($ticketStaffForm->isSubmitted() && $ticketStaffForm->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+            $ticketData = $ticketStaffForm->getData();
+            $entityManager->persist($ticketData);
+            $entityManager->flush();
+        }
+
+        $ticketUsersForm = $this->createForm(TicketUsersType::class, $ticket);
+        $ticketUsersForm->add('users', EntityType::class, [
+            'class' => User::class,
+            'choices' => $ticket->getOrganization()->getUsers(),
+            'choice_label' => function ($u) {
+                return $u->getEmail();
+            },
+            'multiple' => true,
+            'expanded' => true
+        ]);
+
+        $ticketUsersForm->handleRequest($request);
+        if ($ticketUsersForm->isSubmitted() && $ticketUsersForm->isValid()){
+            $entityManager = $this->getDoctrine()->getManager();
+            $ticketData = $ticketUsersForm->getData();
+            $entityManager->persist($ticketData);
+            $entityManager->flush();
+        }
+        
         return $this->render("admin/ticket/single.html.twig", [
             "ticket" => $ticket,
             "commentForm" => $commentForm->createView(),
             "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
+            "ticketStaffForm" => $ticketStaffForm->createView(),
+            "ticketUsersForm" => $ticketUsersForm->createView(),
         ]);
     }
 
