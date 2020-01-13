@@ -20,6 +20,22 @@
             </div>
         </div>
     </div>
+    {% if ticket.mediaFiles is not empty %}
+    <div class="row my-1">
+        <div class="col">
+            <h3>Files</h3>
+            <div class="row">
+                {% for file in ticket.mediaFiles %}
+                    <div class="col-3 mb-3">
+                        <div class="p-3 shadow-sm">
+                            {% include "media/single_file_item.html.twig" %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="row my-1">
         <div class="col">
             <div class="btn-group">
@@ -55,7 +71,7 @@
                 </div>
                 <div class="card-body">
                     <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
-                    <p>{{ comment.content }}</p>
+                    <p>{{ comment.content|raw }}</p>
                 </div>
             </div>
         </div>

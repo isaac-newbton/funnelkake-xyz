@@ -1,0 +1,13 @@
+{% if file %}
+<h3>{{ file.name }}</h3>
+{% if 'image/' in file.mimeType %}
+	<img class="w-100" src="{{ url('files_view', {encoded: uuid_encode(file.uuid)}) }}" alt="{{ file.name }}">
+{% endif %}
+<p>
+	<span>{{ file.timestamp|date("m/d/Y g:iA") }}</span>, <span>{{ file.mimeType }}</span><br>
+	<span>{{ file.size|format_bytes(1) }}</span><br>
+	<span><a href="{{ path('files_view', {encoded: uuid_encode(file.uuid)}) }}" target="_blank">View</a></span>
+</p>
+{% else %}
+<span>No file</span>
+{% endif %}
