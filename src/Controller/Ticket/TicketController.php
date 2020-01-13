@@ -216,7 +216,7 @@ class TicketController extends AbstractController {
             $entityManager->persist($comment);
             $entityManager->flush();
 
-            // return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
+            return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
         }
         $twig_forms['commentForm'] = $commentForm->createView();
 
