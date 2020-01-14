@@ -45,5 +45,6 @@ security:
         - { path: ^/dev/*, roles: ROLE_DEVELOPER }
         - { path: ^/admin/*, roles: ROLE_ADMIN }
         - { path: ^/manager/*, roles: ROLE_MANAGER }
+        - { path: ^/files/*, roles: ROLE_STAFF }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

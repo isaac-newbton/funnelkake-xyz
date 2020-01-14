@@ -6,7 +6,6 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-12 col-md-9">
-
             <div class="row py-3">
                 <div class="col">
                     <div class="card">
@@ -50,21 +49,42 @@
                 </div>
             </div>
 
-            {% for comment in ticket.comment|reverse %}
-            <div class="row py-3">
+            {% if ticket.mediaFiles is not empty %}
+            <div class="row my-1">
                 <div class="col">
-                    <div class="card bg-white">
-                        <div class="card-header">
-                            <span class="badge badge-dark">{{ comment.user.email|default(null)}}</span>
-                        </div>
-                        <div class="card-body">
-                            <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
-                            <p>{{ comment.content }}</p>
-                        </div>
+                    <h3>Files</h3>
+                    <div class="row">
+                        {% for file in ticket.mediaFiles %}
+                            <div class="col-3 mb-3">
+                                <div class="p-3 shadow-sm">
+                                    {% include "media/single_file_item.html.twig" %}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-            {% endfor %}
+            {% endif %}
+
+            <div class="row my-1">
+                <div class="col">
+                    {% for comment in ticket.comment|reverse %}
+                    <div class="row py-3">
+                        <div class="col">
+                            <div class="card bg-white">
+                                <div class="card-header">
+                                    <span class="badge badge-dark">{{ comment.user.email|default(null)}}</span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
+                                    <p>{{ comment.content }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
         <div class="col-sm-12 col-md-3">

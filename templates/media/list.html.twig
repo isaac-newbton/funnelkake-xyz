@@ -1,0 +1,26 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<div class="col">
+				<div class="row">
+					<h2>Files <a href="{{ path('upload_file') }}" class="btn btn-primary">Upload</a></h2>
+				</div>
+				{% if files is not empty %}
+					<div class="row">
+						{% for file in files %}
+							<div class="col-3 mb-3">
+								<div class="p-3 shadow-sm">
+									{% include "media/single_file_item.html.twig" %}
+								</div>
+							</div>
+						{% endfor %}
+					</div>
+				{% else %}
+					<p>There are no files to view.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

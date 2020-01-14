@@ -61,6 +61,7 @@ class Ticket
         $this->comment = new ArrayCollection();
         $this->mediaFiles = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->status = self::STATUS_OPEN;
     }
 
     public function getId(): ?int
