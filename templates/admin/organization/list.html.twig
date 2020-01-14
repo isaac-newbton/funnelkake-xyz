@@ -10,6 +10,13 @@
                 {% for organization in organizations %}
                 <li class="list-grop-item my-2">
                 <h3>{{ organization.name }}</h3>
+                <div>
+                    {% if organization.ticketEmailSlug is defined %}
+                    <span>Ticket email: {{ organization.ticketEmailSlug }}@{{ get_parameter('app.ticket_email_domain') }}</span>
+                    {% else %}
+                    <span class="text-danger">No ticket email @{{ get_parameter('app.ticket_email_domain') }} defined</span>
+                    {% endif %}
+                </div>
                 <div class="btn-group">
                     <a class='btn btn-primary' href="{{ path("tickets_list_organization", {id: organization.id}) }}">Tickets</a>
                     <a class='btn btn-secondary' href="{{ path("organizations_edit", {id: organization.id}) }}">Edit</a>
