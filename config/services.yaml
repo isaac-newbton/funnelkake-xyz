@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     app.media_files_dir: '%kernel.project_dir%/public/app-media'
+    app.ticket_email_domain: 'myhelp.funnelkake.co'
 
 services:
     # default configuration for services in *this* file
