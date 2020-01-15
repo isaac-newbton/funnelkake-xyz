@@ -33,6 +33,11 @@ class Organization
      */
     private $tickets;
 
+    /**
+     * @ORM\Column(type="string", length=30, nullable=true)
+     */
+    private $ticketEmailSlug;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -114,6 +119,18 @@ class Organization
                 $ticket->setOrganization(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTicketEmailSlug(): ?string
+    {
+        return $this->ticketEmailSlug;
+    }
+
+    public function setTicketEmailSlug(?string $ticketEmailSlug): self
+    {
+        $this->ticketEmailSlug = $ticketEmailSlug;
 
         return $this;
     }
