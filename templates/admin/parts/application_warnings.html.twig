@@ -1,0 +1,5 @@
+{% if get_parameter('app.ticket_email_domain')|trim is empty %}
+	<div class="container">
+		<div class="p-3 mb-2 bg-warning text-dark">app.ticket_email_domain is not set</div>
+	</div>
+{% endif %}

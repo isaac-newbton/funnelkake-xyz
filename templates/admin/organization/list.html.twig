@@ -11,7 +11,7 @@
                 <li class="list-grop-item my-2">
                 <h3>{{ organization.name }}</h3>
                 <div>
-                    {% if organization.ticketEmailSlug is defined %}
+                    {% if organization.ticketEmailSlug is defined and organization.ticketEmailSlug is not null %}
                     <span>Ticket email: {{ organization.ticketEmailSlug }}@{{ get_parameter('app.ticket_email_domain') }}</span>
                     {% else %}
                     <span class="text-danger">No ticket email @{{ get_parameter('app.ticket_email_domain') }} defined</span>
