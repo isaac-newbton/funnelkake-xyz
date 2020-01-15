@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 use App\Entity\User;
 use App\Form\Type\User\UserType;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @IsGranted("ROLE_ADMIN")
@@ -28,12 +29,19 @@ class UserController extends AbstractController {
     /**
      * @Route("/users/add", name="users_add")
      */
-    public function addUser(Request $request){
+    public function addUser(Request $request, UserPasswordEncoderInterface $encoder){
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
         $form->handleRequest($request);
         if ( $form->isSubmitted() && $form->isValid() ){
+            $entityManager = $this->getDoctrine()->getManager();
+            $user = $form->getData();
+            $user->setPassword($encoder->encodePassword($user, rand(1000000, 10000000000)));
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
             // email them a password reset link at some point
             return $this->redirectToRoute("users_list");
         }
