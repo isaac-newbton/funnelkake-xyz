@@ -51,10 +51,16 @@ class Ticket
      */
     private $mediaFiles;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\User", inversedBy="tickets")
+     */
+    private $users;
+
     public function __construct()
     {
         $this->comment = new ArrayCollection();
         $this->mediaFiles = new ArrayCollection();
+        $this->users = new ArrayCollection();
         $this->status = self::STATUS_OPEN;
     }
 
@@ -196,6 +202,32 @@ class Ticket
     public function open(): self
     {
         $this->setStatus(self::STATUS_OPEN);
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->contains($user)) {
+            $this->users->removeElement($user);
+        }
+
         return $this;
     }
 }
