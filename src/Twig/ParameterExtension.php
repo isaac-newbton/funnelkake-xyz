@@ -14,7 +14,7 @@ class ParameterExtension extends AbstractExtension{
 	}
 
 	public function getParameter($param){
-		return $this->params->get($param);
+		return $this->params->has($param) ? $this->params->get($param) : '';
 	}
 
 	public function getFunctions(): array{
