@@ -192,7 +192,8 @@ class TicketController extends AbstractController {
 
     /**
      * @Route("tickets/view/{id}", name="tickets_single")
-     * @IsGranted("ROLE_ADMIN")
+     * @IsGranted("ROLE_USER")
+     * TODO: make this viewable only by role_staff+ or role_user where role_user belongs to the organization this ticket is assigned to
      */
     public function viewTicket(int $id, Request $request, TimestampHandler $timestamp){
         $twig_forms = [];
@@ -306,16 +307,7 @@ class TicketController extends AbstractController {
         }
         
         $render_args = ["ticket" => $ticket];
-        return $this->render("admin/ticket/single.html.twig", array_merge($render_args, $twig_forms)
-        // [
-        //     // "ticket" => $ticket,
-        //     // "commentForm" => $commentForm->createView(),
-        //     // "ticketOrganizationForm" => $ticketOrganizationForm->createView(),
-        //     // "ticketStaffForm" => $ticketStaffForm->createView(),
-        //     // // TODO: this fails if the ticket doesnt have an organization set
-        //     // "ticketUsersForm" => $ticketUsersForm->createView(),
-        // ]
-    );
+        return $this->render("admin/ticket/single.html.twig", array_merge($render_args, $twig_forms));
     }
 
     /**

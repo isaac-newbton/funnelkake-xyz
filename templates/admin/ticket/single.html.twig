@@ -3,7 +3,7 @@
 {% set assignOrganization = "<button class='btn btn-link assign-ticket' data-toggle='modal' data-target='#ticket-organization-modal'>Assign Organization</button>" %}
 
 {% block body %}
-<div class="container">
+<div class="container" id="single-ticket" data-ticketid={{ ticket.id }}>
     <div class="row">
         <div class="col-sm-12 col-md-9">
             <div class="row py-3">
@@ -87,47 +87,7 @@
             </div>
         </div>
 
-        <div class="col-sm-12 col-md-3">
-            {% if is_granted('ROLE_ADMIN') %}
-            <div class="row py-3">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Assigned Staff</h5>
-                        </div>
-                        <div class="card-body">
-                        {% if (ticketStaffForm is defined) %}
-                            {# TODO: make this ajax #}
-                            {{form_start(ticketStaffForm)}}
-                            {{form_widget(ticketStaffForm.users)}}
-                            {{form_end(ticketStaffForm)}}
-                        {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if is_granted('ROLE_USER') %}
-            {% if (ticketUsersForm is defined) and (ticket.organization.users is defined ) and (ticket.organization.users|length > 0) %}
-            <div class="row py-3">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Organization User(s)</h5>
-                        </div>
-                        <div class="card-body">
-                            {{form_start(ticketUsersForm)}}
-                            {{form_widget(ticketUsersForm.users)}}
-                            {# TODO: make this ajax #}
-                            {{form_end(ticketUsersForm)}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            {% endif %}
-        </div>
+        <div class="col-sm-12 col-md-3" id="assigned-ticket-users"></div>
     </div>
 </div>
 
@@ -147,6 +107,10 @@
         </div>
     </div>
 </div>
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('react-ticket') }}
+{% endblock %}
 
 {# ugly js goes here until we find a better way to handle it #}
 <script>
