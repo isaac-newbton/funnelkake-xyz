@@ -9,7 +9,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 use App\Entity\User;
 use App\Form\Type\User\UserType;
+use App\Service\Email\EmailServiceHandler;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 /**
  * @IsGranted("ROLE_ADMIN")
@@ -29,7 +33,7 @@ class UserController extends AbstractController {
     /**
      * @Route("/users/add", name="users_add")
      */
-    public function addUser(Request $request, UserPasswordEncoderInterface $encoder){
+    public function addUser(Request $request, UserPasswordEncoderInterface $encoder, EmailServiceHandler $emailServiceHandler){
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
@@ -43,6 +47,14 @@ class UserController extends AbstractController {
             $entityManager->flush();
 
             // email them a password reset link at some point
+            $emailServiceHandler->sendEmail(
+                [$user->getEmail()],
+                null,
+                null,
+                "FunnelKake user registration",
+                "newUser.html.twig",
+                ["user" => $user],
+            );
             return $this->redirectToRoute("users_list");
         }
         return $this->render("admin/user/form.html.twig", [
