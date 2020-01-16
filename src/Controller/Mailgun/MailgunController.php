@@ -21,7 +21,7 @@ class MailgunController extends AbstractController{
 		$post_data = $request->request->all();
 		$files_data = $request->files->all();
 		$ticket = $mailgun->makeTicketFromInboundMessage($post_data, $files_data, $entity_manager, $media_manager);
-		if($organization = $mapper->findOrganization($ticket->getEmail(), $user_repository)){
+		if(null==$ticket->getOrganization() && ($organization = $mapper->findOrganization($ticket->getEmail(), $user_repository))){
 			$ticket->setOrganization($organization);
 			$entity_manager->flush();
 		}

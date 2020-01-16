@@ -7,13 +7,16 @@ use App\Entity\MediaFile;
 use App\Repository\OrganizationRepository;
 use App\Service\Media\MediaManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MailgunMessages{
 	private $orgRepository;
+	private $params;
 
-	public function __construct(OrganizationRepository $orgRepository){
+	public function __construct(OrganizationRepository $orgRepository, ParameterBagInterface $params){
 		$this->orgRepository = $orgRepository;
+		$this->params = $params;
 	}
 
 	public function makeTicketFromInboundMessage($post_data, $files_data, EntityManagerInterface $entity_manager, MediaManager $media_manager) : Ticket{
@@ -25,7 +28,6 @@ class MailgunMessages{
 			$entity_manager->persist($comment);
 
 			if($files_data && !empty($files_data)){
-				$comment->setContent($comment->getContent() . PHP_EOL . '<pre>' . var_export($post_data, true) . '</pre>');
 				/**
 				 * @var UploadedFile $uploaded_file
 				 */
@@ -34,6 +36,26 @@ class MailgunMessages{
 					$media_manager->uploadToMediaFile($uploaded_file, $file);
 					$entity_manager->persist($file);
 					$ticket->addMediaFile($file);
+				}
+			}
+		}
+
+		//map email "To" to matching organization by organization.ticketEmailSlug
+		if(isset($post_data['To']) && $this->params->has('app.ticket_email_domain')){
+			$email_end = '@' . $this->params->get('app.ticket_email_domain');
+			if(false!==strpos($post_data['To'], $email_end)){
+				$parts = explode('@', $post_data['To']);
+				$email_username = strtolower($parts[0]);
+				if(''!=trim($email_username)){
+					$matching_organization = $this->orgRepository->createQueryBuilder('o')
+						->andWhere('o.ticketEmailSlug = :val')
+						->setParameter('val', $email_username)
+						->getQuery()
+						->getOneOrNullResult()
+					;
+					if(null!=$matching_organization){
+						$ticket->setOrganization($matching_organization);
+					}
 				}
 			}
 		}
