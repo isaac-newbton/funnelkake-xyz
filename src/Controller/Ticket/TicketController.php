@@ -16,6 +16,7 @@ use App\Form\Type\Ticket\TicketStaffType;
 use App\Form\Type\Comment\CommentType;
 use App\Form\Type\Ticket\TicketOrganizationType;
 use App\Form\Type\Ticket\TicketUsersType;
+use App\Service\Email\EmailServiceHandler;
 use App\Service\Timestamp\TimestampHandler;
 use App\Service\UserRole\UserRoleHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -200,7 +201,8 @@ class TicketController extends AbstractController {
      * @IsGranted("ROLE_USER")
      * TODO: make this viewable only by role_staff+ or role_user where role_user belongs to the organization this ticket is assigned to
      */
-    public function viewTicket(int $id, Request $request, TimestampHandler $timestamp){
+
+    public function viewTicket(int $id, Request $request, TimestampHandler $timestamp, EmailServiceHandler $emailServiceHandler){
         $twig_forms = [];
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         if ($this->isGranted("ROLE_STAFF") || $this->getUser()->getOrganization() == $ticket->getOrganization()){
@@ -224,6 +226,21 @@ class TicketController extends AbstractController {
             $entityManager->persist($comment);
             $entityManager->flush();
 
+            $recipients = [];
+            foreach ($ticket->getUsers() as $user){
+                if ($user != $comment->getUser()) $recipients[] = $user->getEmail();
+            }
+            $emailServiceHandler->sendEmail(
+                $recipients,
+                null,
+                null,
+                "Ticket updated: {$ticket->getSubject()}",
+                "ticketComment.html.twig",
+                [
+                    "ticket" => $ticket,
+                    "comment" => $comment
+                ]
+                );
             return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
         }
         $twig_forms['commentForm'] = $commentForm->createView();
