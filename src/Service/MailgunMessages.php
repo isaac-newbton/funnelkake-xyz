@@ -38,35 +38,35 @@ class MailgunMessages{
 					$ticket->addMediaFile($file);
 				}
 			}
-		}
 
-		$comment->setContent($comment->getContent() . PHP_EOL . '<pre>To: ' . var_export($post_data['To'], true) . '</pre>');
+			$comment->setContent($comment->getContent() . PHP_EOL . '<pre>recipient: ' . var_export($post_data['recipient'], true) . '</pre>');
 
-		//map email "To" to matching organization by organization.ticketEmailSlug
-		if(isset($post_data['To']) && $this->params->has('app.ticket_email_domain')){
-			$email_end = '@' . $this->params->get('app.ticket_email_domain');
-			if(false!==strpos($post_data['To'], $email_end)){
-				$parts = explode('@', $post_data['To']);
-				$email_username = strtolower($parts[0]);
-				if(''!=trim($email_username)){
-					$matching_organization = $this->orgRepository->createQueryBuilder('o')
-						->andWhere('o.ticketEmailSlug = :val')
-						->setParameter('val', $email_username)
-						->getQuery()
-						->getOneOrNullResult()
-					;
-					$comment->setContent($comment->getContent() . PHP_EOL . "<pre>matching org is" . var_export($matching_organization, true) . "</pre>");
-					if(null!=$matching_organization){
-						$ticket->setOrganization($matching_organization);
+			//map email "recipient" to matching organization by organization.ticketEmailSlug
+			if(isset($post_data['recipient']) && $this->params->has('app.ticket_email_domain')){
+				$email_end = '@' . $this->params->get('app.ticket_email_domain');
+				if(false!==strpos($post_data['To'], $email_end)){
+					$parts = explode('@', $post_data['To']);
+					$email_username = strtolower($parts[0]);
+					if(''!=trim($email_username)){
+						$matching_organization = $this->orgRepository->createQueryBuilder('o')
+							->andWhere('o.ticketEmailSlug = :val')
+							->setParameter('val', $email_username)
+							->getQuery()
+							->getOneOrNullResult()
+						;
+						$comment->setContent($comment->getContent() . PHP_EOL . "<pre>matching org is" . var_export($matching_organization, true) . "</pre>");
+						if(null!=$matching_organization){
+							$ticket->setOrganization($matching_organization);
+						}
+					}else{
+						$comment->setContent($comment->getContent() . PHP_EOL . "<pre>email username is empty in {$parts[0]}</pre>");
 					}
 				}else{
-					$comment->setContent($comment->getContent() . PHP_EOL . "<pre>email username is empty in {$parts[0]}</pre>");
+					$comment->setContent($comment->getContent() . PHP_EOL . "<pre>$email_end not found in recipient</pre>");
 				}
 			}else{
-				$comment->setContent($comment->getContent() . PHP_EOL . "<pre>$email_end not found in To:</pre>");
+				$comment->setContent($comment->getContent() . PHP_EOL . '<pre>app.ticket_email_domain not defined</pre>');
 			}
-		}else{
-			$comment->setContent($comment->getContent() . PHP_EOL . '<pre>app.ticket_email_domain not defined</pre>');
 		}
 
 		$ticket->addComment($comment);
