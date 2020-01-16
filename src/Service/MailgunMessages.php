@@ -4,12 +4,13 @@ namespace App\Service;
 use App\Entity\Ticket;
 use App\Entity\Comment;
 use App\Entity\MediaFile;
+use App\Repository\OrganizationRepository;
 use App\Service\Media\MediaManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MailgunMessages{
-	public function makeTicketFromInboundMessage($post_data, $files_data, EntityManagerInterface $entity_manager, MediaManager $media_manager) : Ticket{
+	public function makeTicketFromInboundMessage($post_data, $files_data, EntityManagerInterface $entity_manager, MediaManager $media_manager, OrganizationRepository $org_repository) : Ticket{
 		$ticket = new Ticket();
 		if($post_data['body-html']){
 			$comment = new Comment();
@@ -18,7 +19,7 @@ class MailgunMessages{
 			$entity_manager->persist($comment);
 
 			if($files_data && !empty($files_data)){
-				$comment->setContent('<pre>Files: ' . count($files_data) . PHP_EOL . var_export($files_data, true) . '</pre><br>' . $comment->getContent());
+				$comment->setContent($comment->getContent() . PHP_EOL . '<pre>' . var_export($post_data, true) . '</pre>');
 				/**
 				 * @var UploadedFile $uploaded_file
 				 */
