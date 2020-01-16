@@ -91,16 +91,13 @@ const AssignedTicketUsers = props => {
 		{console.log('fetching data...')}
 		fetchData();
 		{console.log('fetching data completed')}
-		// updateData(activeUsers)
 	}, [activeUsers.length])
 
 
 	return (
 		<div>
-			<h5 className="py-2">Staff Users</h5>
-			<TicketUserList activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={staffUsers} />
-			<h5 className="py-2">Organization Users</h5>
-			<TicketUserList activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={organizationUsers} />
+			<TicketUserList title="Assign Staff" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={staffUsers} />
+			<TicketUserList title="Assign Users" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={organizationUsers} />
 		</div>
 	)
 }

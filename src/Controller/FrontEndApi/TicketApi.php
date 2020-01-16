@@ -78,27 +78,32 @@ class TicketApi extends AbstractController {
 	public function getTicketstaffUsers(int $ticketId){
 
 		// TODO: This following 11 lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers() on the following ->add(['choice_label'])
-        $userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
-        $users = $this->getDoctrine()->getRepository(User::class)->findAll();
-        $staff_users = [];
-        foreach($users as $u){
-            foreach($u->getRoles() as $user_role){
-                if (in_array('ROLE_STAFF', $userRoleHandler->getInheritedRoles($user_role))){
-                    $staff_users[] = $u;
-                    continue;
-                }
-            }
-        }
+		if ($this->isGranted("ROLE_STAFF")) {
 
-		$encoders = [new JsonEncoder()];
-		$normalizers = [new ObjectNormalizer()];
-		$serializer = new Serializer($normalizers, $encoders);
-
-		return new Response($serializer->serialize($staff_users, 'json', [
-			'circular_reference_handler' => function ($object) {
-				return $object->getId();
+			$userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
+			$users = $this->getDoctrine()->getRepository(User::class)->findAll();
+			$staff_users = [];
+			foreach($users as $u){
+				foreach($u->getRoles() as $user_role){
+					if (in_array('ROLE_STAFF', $userRoleHandler->getInheritedRoles($user_role))){
+						$staff_users[] = $u;
+						continue;
+					}
+				}
 			}
-		]));
+			
+			$encoders = [new JsonEncoder()];
+			$normalizers = [new ObjectNormalizer()];
+			$serializer = new Serializer($normalizers, $encoders);
+			
+			return new Response($serializer->serialize($staff_users, 'json', [
+				'circular_reference_handler' => function ($object) {
+					return $object->getId();
+				}
+				]));
+		} else {
+			return new JsonResponse([]);
+		}
 	}
 
 	/**
