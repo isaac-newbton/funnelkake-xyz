@@ -12,7 +12,11 @@
                         <div class="card-header">
                             <span class="badge badge-dark">{{ ticket.email }}</span>
                             <span class="float-right">
-                                <strong>{{ticket.organization.name ?? assignOrganization|raw }}</strong>
+                                {% if is_granted("ROLE_STAFF") %}
+                                    <strong>{{ticket.organization.name ?? assignOrganization|raw }}</strong>
+                                {% else %}
+                                    <strong>{{ticket.organization.name|default('')}}</strong>
+                                {% endif %}
                                 <span>{{ ticket.getStatusText|default('open') }}</span>
                             </span>
                         </div>
