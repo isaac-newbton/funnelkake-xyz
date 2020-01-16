@@ -179,25 +179,32 @@ class TicketController extends AbstractController {
 
     /**
      * @Route("/tickets/organization/{id}/list", name="tickets_list_organization", requirements={"id"="\d+"})
+     * @IsGranted("ROLE_USER")
      */
     public function viewOrganizationTickets(int $id){
         $organization = $this->getDoctrine()->getRepository(Organization::class)->find($id);
-        $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy(["organization" => $organization]);
+        if ($this->isGranted("ROLE_STAFF") || $this->getUser()->getOrganization() === $organization) {
+            $tickets = $this->getDoctrine()->getRepository(Ticket::class)->findBy(["organization" => $organization]);
 
-        return $this->render("admin/ticket/list.html.twig", [
-            "tickets" => $tickets,
-            "organization" => $organization
-        ]);
+            return $this->render("admin/ticket/list.html.twig", [
+                "tickets" => $tickets,
+                "organization" => $organization
+                ]);
+        } else {
+            return new Response("Access Denied");
+        }
     }
 
     /**
-     * @Route("tickets/view/{id}", name="tickets_single")
+     * @Route("/tickets/view/{id}", name="tickets_single")
      * @IsGranted("ROLE_USER")
      * TODO: make this viewable only by role_staff+ or role_user where role_user belongs to the organization this ticket is assigned to
      */
     public function viewTicket(int $id, Request $request, TimestampHandler $timestamp){
         $twig_forms = [];
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
+        if ($this->isGranted("ROLE_STAFF") || $this->getUser()->getOrganization() == $ticket->getOrganization()){
+
         $comment = new Comment();
         $commentForm = $this->createForm(CommentType::class, $comment);
         
@@ -308,6 +315,9 @@ class TicketController extends AbstractController {
         
         $render_args = ["ticket" => $ticket];
         return $this->render("admin/ticket/single.html.twig", array_merge($render_args, $twig_forms));
+        } else {
+            return new Response("Access denied");
+        }
     }
 
     /**
