@@ -54,7 +54,7 @@ class MailgunMessages{
 							->getQuery()
 							->getOneOrNullResult()
 						;
-						$comment->setContent($comment->getContent() . PHP_EOL . "<pre>matching org is" . var_export($matching_organization, true) . "</pre>");
+						$comment->setContent($comment->getContent() . PHP_EOL . "<pre>matching org for emailticketslug \"$email_username\" is" . var_export($matching_organization, true) . "</pre>");
 						if(null!=$matching_organization){
 							$ticket->setOrganization($matching_organization);
 						}
