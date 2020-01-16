@@ -40,7 +40,7 @@ class MailgunMessages{
 			}
 		}
 
-		$comment->setContent($comment->getContent() . PHP_EOL . '<pre>To: ' . var_export($post_data['To']) . '</pre>');
+		$comment->setContent($comment->getContent() . PHP_EOL . '<pre>To: ' . var_export($post_data['To'], true) . '</pre>');
 
 		//map email "To" to matching organization by organization.ticketEmailSlug
 		if(isset($post_data['To']) && $this->params->has('app.ticket_email_domain')){
