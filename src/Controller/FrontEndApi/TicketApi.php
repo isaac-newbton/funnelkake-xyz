@@ -59,6 +59,7 @@ class TicketApi extends AbstractController {
 	 * @Route("/api/ticket/organization/users/{ticketId}", methods={"GET"})
 	 */
 	public function getTicketOrganizationUsers(int $ticketId){
+		// TODO: This following lines should occur completely in a service that we call i.e. $userRoleHandler->getOrganizationUsers()
 
 		$encoders = [new JsonEncoder()];
 		$normalizers = [new ObjectNormalizer()];
@@ -77,7 +78,7 @@ class TicketApi extends AbstractController {
 	 */
 	public function getTicketstaffUsers(int $ticketId){
 
-		// TODO: This following 11 lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers() on the following ->add(['choice_label'])
+		// TODO: This following lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers()
 		if ($this->isGranted("ROLE_STAFF")) {
 
 			$userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
@@ -109,6 +110,7 @@ class TicketApi extends AbstractController {
 	/**
 	 * @Route("/api/ticket/users/{ticketId}", methods={"GET"})
 	 */
+	// TODO: This following lines should occur completely in a service that we call i.e. $userRoleHandler->getTicketActiveUsers() on the following ->add(['choice_label'])
 	public function getTicketUsers(int $ticketId){
 
 		$encoders = [new JsonEncoder()];
