@@ -4,11 +4,21 @@ namespace App\Service;
 use App\Entity\Ticket;
 use App\Entity\Comment;
 use App\Entity\MediaFile;
+use App\Repository\OrganizationRepository;
 use App\Service\Media\MediaManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MailgunMessages{
+	private $orgRepository;
+	private $params;
+
+	public function __construct(OrganizationRepository $orgRepository, ParameterBagInterface $params){
+		$this->orgRepository = $orgRepository;
+		$this->params = $params;
+	}
+
 	public function makeTicketFromInboundMessage($post_data, $files_data, EntityManagerInterface $entity_manager, MediaManager $media_manager) : Ticket{
 		$ticket = new Ticket();
 		if($post_data['body-html']){
@@ -18,7 +28,6 @@ class MailgunMessages{
 			$entity_manager->persist($comment);
 
 			if($files_data && !empty($files_data)){
-				$comment->setContent('<pre>Files: ' . count($files_data) . PHP_EOL . var_export($files_data, true) . '</pre><br>' . $comment->getContent());
 				/**
 				 * @var UploadedFile $uploaded_file
 				 */
@@ -29,7 +38,28 @@ class MailgunMessages{
 					$ticket->addMediaFile($file);
 				}
 			}
+
+			//map email "recipient" to matching organization by organization.ticketEmailSlug
+			if(isset($post_data['recipient']) && $this->params->has('app.ticket_email_domain')){
+				$email_end = '@' . $this->params->get('app.ticket_email_domain');
+				if(false!==strpos($post_data['recipient'], $email_end)){
+					$parts = explode('@', $post_data['recipient']);
+					$email_username = strtolower($parts[0]);
+					if(''!=trim($email_username)){
+						$matching_organization = $this->orgRepository->createQueryBuilder('o')
+							->andWhere('o.ticketEmailSlug = :val')
+							->setParameter('val', $email_username)
+							->getQuery()
+							->getOneOrNullResult()
+						;
+						if(null!=$matching_organization){
+							$ticket->setOrganization($matching_organization);
+						}
+					}
+				}
+			}
 		}
+
 		$ticket->addComment($comment);
 		$ticket->setSubject($post_data['Subject']);
 		$ticket->setEmail($post_data['From']);
