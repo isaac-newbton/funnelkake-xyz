@@ -2,6 +2,7 @@
 
 namespace App\Controller\FrontEndApi;
 
+use App\Entity\StopwatchAwareTrait as EntityStopwatchAwareTrait;
 use App\Entity\Ticket;
 use App\Entity\User;
 use App\Service\UserRole\UserRoleHandler;
@@ -19,6 +20,7 @@ use Symfony\Component\Serializer\Serializer;
 
 class TicketApi extends AbstractController {
 
+	use EntityStopwatchAwareTrait;
 	/**
 	 * @Route("/api/ticket/organization/users/add/{ticketId}", methods={"POST"})
 	 */
@@ -60,17 +62,19 @@ class TicketApi extends AbstractController {
 	 */
 	public function getTicketOrganizationUsers(int $ticketId){
 		// TODO: This following lines should occur completely in a service that we call i.e. $userRoleHandler->getOrganizationUsers()
-
-		$encoders = [new JsonEncoder()];
-		$normalizers = [new ObjectNormalizer()];
-		$serializer = new Serializer($normalizers, $encoders);
-
-		$ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($ticketId);
-		return new Response($serializer->serialize($ticket->getOrganization()->getUsers(), 'json', [
-			'circular_reference_handler' => function ($object) {
-				return $object->getId();
-			}
-		]));
+		if (count($organizationUsers = $this->getDoctrine()->getRepository(Ticket::class)->find($ticketId)->getOrganization()->getUsers()) > 0){
+			$response = [];
+			foreach ($organizationUsers as $user){
+				$response[] = [
+					"id" => $user->getId(),
+					"email" => $user->getEmail(),
+					"username" => $user->getUsername(),
+				];
+			}	
+			return new JsonResponse($response);
+		} else {
+			return new JsonResponse([]);
+		}
 	}
 
 	/**
@@ -83,45 +87,41 @@ class TicketApi extends AbstractController {
 
 			$userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
 			$users = $this->getDoctrine()->getRepository(User::class)->findAll();
-			$staff_users = [];
-			foreach($users as $u){
-				foreach($u->getRoles() as $user_role){
+			$response = [];
+			foreach($users as $user){
+				foreach($user->getRoles() as $user_role){
 					if (in_array('ROLE_STAFF', $userRoleHandler->getInheritedRoles($user_role))){
-						$staff_users[] = $u;
+						$response[] = [
+							"id" => $user->getId(),
+							"email" => $user->getEmail(),
+							"username" => $user->getUsername(),
+						];
 						continue;
 					}
 				}
 			}
-			
-			$encoders = [new JsonEncoder()];
-			$normalizers = [new ObjectNormalizer()];
-			$serializer = new Serializer($normalizers, $encoders);
-			
-			return new Response($serializer->serialize($staff_users, 'json', [
-				'circular_reference_handler' => function ($object) {
-					return $object->getId();
-				}
-				]));
+			return new JsonResponse($response);
 		} else {
 			return new JsonResponse([]);
 		}
 	}
 
 	/**
-	 * @Route("/api/ticket/users/{ticketId}", methods={"GET"})
+	 * @Route("/api/ticket/users/assigned/{id}", methods={"GET"})
 	 */
-	// TODO: This following lines should occur completely in a service that we call i.e. $userRoleHandler->getTicketActiveUsers() on the following ->add(['choice_label'])
-	public function getTicketUsers(int $ticketId){
-
-		$encoders = [new JsonEncoder()];
-		$normalizers = [new ObjectNormalizer()];
-		$serializer = new Serializer($normalizers, $encoders);
-
-		$ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($ticketId);
-		return new Response($serializer->serialize($ticket->getUsers(), 'json', [
-			'circular_reference_handler' => function ($object) {
-				return $object->getId();
+	public function getTicketUsers(int $id){
+		if ($ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id)){
+			$response = [];
+			foreach($ticket->getUsers() as $user){
+				$response[] = [
+					"id" => $user->getId(),
+					"email" => $user->getEmail(),
+					"username" => $user->getUsername(),
+				];
 			}
-		]));
+			return new JsonResponse($response);
+		} else {
+			return new JsonResponse([]);
+		}
 	}
 }
