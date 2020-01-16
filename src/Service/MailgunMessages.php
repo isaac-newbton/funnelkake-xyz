@@ -23,7 +23,7 @@ class MailgunMessages{
 		$ticket = new Ticket();
 		if($post_data['body-html']){
 			$comment = new Comment();
-			$comment->setContent($post_data['body-html'] . PHP_EOL . '<pre>' . var_export($post_data, true), '</pre>');
+			$comment->setContent($post_data['body-html']);
 			$comment->setTimestamp(new \DateTime());
 			$entity_manager->persist($comment);
 
@@ -39,13 +39,11 @@ class MailgunMessages{
 				}
 			}
 
-			$comment->setContent($comment->getContent() . PHP_EOL . '<pre>recipient: ' . var_export($post_data['recipient'], true) . '</pre>');
-
 			//map email "recipient" to matching organization by organization.ticketEmailSlug
 			if(isset($post_data['recipient']) && $this->params->has('app.ticket_email_domain')){
 				$email_end = '@' . $this->params->get('app.ticket_email_domain');
-				if(false!==strpos($post_data['To'], $email_end)){
-					$parts = explode('@', $post_data['To']);
+				if(false!==strpos($post_data['recipient'], $email_end)){
+					$parts = explode('@', $post_data['recipient']);
 					$email_username = strtolower($parts[0]);
 					if(''!=trim($email_username)){
 						$matching_organization = $this->orgRepository->createQueryBuilder('o')
@@ -54,18 +52,11 @@ class MailgunMessages{
 							->getQuery()
 							->getOneOrNullResult()
 						;
-						$comment->setContent($comment->getContent() . PHP_EOL . "<pre>matching org for emailticketslug \"$email_username\" is" . var_export($matching_organization, true) . "</pre>");
 						if(null!=$matching_organization){
 							$ticket->setOrganization($matching_organization);
 						}
-					}else{
-						$comment->setContent($comment->getContent() . PHP_EOL . "<pre>email username is empty in {$parts[0]}</pre>");
 					}
-				}else{
-					$comment->setContent($comment->getContent() . PHP_EOL . "<pre>$email_end not found in recipient</pre>");
 				}
-			}else{
-				$comment->setContent($comment->getContent() . PHP_EOL . '<pre>app.ticket_email_domain not defined</pre>');
 			}
 		}
 
