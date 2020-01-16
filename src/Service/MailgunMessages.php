@@ -23,7 +23,7 @@ class MailgunMessages{
 		$ticket = new Ticket();
 		if($post_data['body-html']){
 			$comment = new Comment();
-			$comment->setContent($post_data['body-html']);
+			$comment->setContent($post_data['body-html'] . PHP_EOL . '<pre>' . var_export($post_data, true), '</pre>');
 			$comment->setTimestamp(new \DateTime());
 			$entity_manager->persist($comment);
 
