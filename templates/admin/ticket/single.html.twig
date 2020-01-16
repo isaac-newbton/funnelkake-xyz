@@ -77,7 +77,7 @@
                                 </div>
                                 <div class="card-body">
                                     <p class="small">{{ comment.timestamp|date('m/d/Y h:ia')}}</p>
-                                    <p>{{ comment.content }}</p>
+                                    <p>{{ comment.content|raw }}</p>
                                 </div>
                             </div>
                         </div>

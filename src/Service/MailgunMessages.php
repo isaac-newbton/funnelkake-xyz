@@ -40,6 +40,8 @@ class MailgunMessages{
 			}
 		}
 
+		$comment->setContent($comment->getContent() . PHP_EOL . '<pre>To: ' . var_export($post_data['To']) . '</pre>');
+
 		//map email "To" to matching organization by organization.ticketEmailSlug
 		if(isset($post_data['To']) && $this->params->has('app.ticket_email_domain')){
 			$email_end = '@' . $this->params->get('app.ticket_email_domain');
@@ -53,12 +55,20 @@ class MailgunMessages{
 						->getQuery()
 						->getOneOrNullResult()
 					;
+					$comment->setContent($comment->getContent() . PHP_EOL . "<pre>matching org is" . var_export($matching_organization) . "</pre>");
 					if(null!=$matching_organization){
 						$ticket->setOrganization($matching_organization);
 					}
+				}else{
+					$comment->setContent($comment->getContent() . PHP_EOL . "<pre>email username is empty in {$parts[0]}</pre>");
 				}
+			}else{
+				$comment->setContent($comment->getContent() . PHP_EOL . "<pre>$email_end not found in To:</pre>");
 			}
+		}else{
+			$comment->setContent($comment->getContent() . PHP_EOL . '<pre>app.ticket_email_domain not defined</pre>');
 		}
+
 		$ticket->addComment($comment);
 		$ticket->setSubject($post_data['Subject']);
 		$ticket->setEmail($post_data['From']);
