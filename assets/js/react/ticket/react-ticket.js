@@ -11,7 +11,7 @@ const AssignedTicketUsers = props => {
 	const [activeUsers, setActiveUsers] = useState([])
 
 	async function fetchData() {
-		await fetch(window.location.protocol + '//' + window.location.host + '/api/ticket/organization/users/'+ticketId)
+		await fetch('/api/ticket/organization/users/'+ticketId)
 			.then((response) => {
 				return response.json();
 			})
@@ -19,14 +19,14 @@ const AssignedTicketUsers = props => {
 				setOrganizationUsers(userData)
 			})
 
-		await fetch(window.location.protocol + '//' + window.location.host + '/api/ticket/staff/users/'+ticketId)
+		await fetch('/api/ticket/staff/users/'+ticketId)
 			.then((response) => {
 				return response.json();
 			})
 			.then((userData) => {
 				setStaffUsers(userData)
 			})
-		await fetch(window.location.protocol + '//' + window.location.host + '/api/ticket/users/'+ticketId)
+		await fetch('/api/ticket/users/'+ticketId)
 			.then((response) => {
 				return response.json();
 			})
@@ -37,7 +37,7 @@ const AssignedTicketUsers = props => {
 	}
 
 	function addUserHandler(user) {
-		fetch(window.location.protocol + '//' + window.location.host + '/api/ticket/organization/users/add/'+ticketId, {
+		fetch('/api/ticket/organization/users/add/'+ticketId, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const AssignedTicketUsers = props => {
 	}
 
 	function removeUserHandler(user) {
-		fetch(window.location.protocol + '//' + window.location.host + '/api/ticket/organization/users/remove/'+ticketId, {
+		fetch('/api/ticket/organization/users/remove/'+ticketId, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -91,16 +91,13 @@ const AssignedTicketUsers = props => {
 		{console.log('fetching data...')}
 		fetchData();
 		{console.log('fetching data completed')}
-		// updateData(activeUsers)
 	}, [activeUsers.length])
 
 
 	return (
 		<div>
-			<h5 className="py-2">Staff Users</h5>
-			<TicketUserList activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={staffUsers} />
-			<h5 className="py-2">Organization Users</h5>
-			<TicketUserList activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={organizationUsers} />
+			<TicketUserList title="Assign Staff" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={staffUsers} />
+			<TicketUserList title="Assign Users" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={organizationUsers} />
 		</div>
 	)
 }
