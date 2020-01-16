@@ -3,7 +3,6 @@ import TicketUser from './TicketUser';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 const TicketUserList = props => {
-	if (props.users.length > 0){
 		return (
 		<>
 		<h5 className="py-2">{props.title}</h5>
@@ -20,9 +19,6 @@ const TicketUserList = props => {
 		</ButtonGroup>
 		</>
 	)
-	} else {
-		return null
-	}
 }
 
 export default TicketUserList;

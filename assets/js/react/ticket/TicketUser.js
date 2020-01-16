@@ -15,7 +15,7 @@ const TicketUser = props => {
 
 	return <Button
 				onClick={() => statusHandler(status)}
-				variant={status === true ? "success" : "danger"}>{props.user.email}
+				variant={status === true ? "success" : "danger"}>{props.user.username}
 			</Button>
 }
 

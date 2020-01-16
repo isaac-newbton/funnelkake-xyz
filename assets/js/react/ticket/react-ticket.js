@@ -10,8 +10,36 @@ const AssignedTicketUsers = props => {
 	const [organizationUsers, setOrganizationUsers] = useState([])
 	const [activeUsers, setActiveUsers] = useState([])
 
-	async function fetchData() {
-		await fetch('/api/ticket/organization/users/'+ticketId)
+
+	// async function fetchData() {
+	// 	fetch('/api/ticket/organization/users/'+ticketId)
+	// 		.then((response) => {
+	// 			return response.json();
+	// 		})
+	// 		.then((userData) => {
+	// 			setOrganizationUsers(userData)
+	// 			isLoadedHandler()
+	// 		})
+
+	// 	fetch('/api/ticket/staff/users/'+ticketId)
+	// 		.then((response) => {
+	// 			return response.json();
+	// 		})
+	// 		.then((userData) => {
+	// 			setStaffUsers(userData)
+	// 			isLoadedHandler()
+	// 		})
+	// 	fetch('/api/ticket/users/assigned/'+ticketId)
+	// 		.then((response) => {
+	// 			return response.json();
+	// 		})
+	// 		.then((userData) => {
+	// 			setActiveUsers(userData)
+	// 			isLoadedHandler()
+	// 		})
+	// }
+	useEffect(function fetchData() {
+		fetch('/api/ticket/organization/users/'+ticketId)
 			.then((response) => {
 				return response.json();
 			})
@@ -19,22 +47,21 @@ const AssignedTicketUsers = props => {
 				setOrganizationUsers(userData)
 			})
 
-		await fetch('/api/ticket/staff/users/'+ticketId)
+		fetch('/api/ticket/staff/users/'+ticketId)
 			.then((response) => {
 				return response.json();
 			})
 			.then((userData) => {
 				setStaffUsers(userData)
 			})
-		await fetch('/api/ticket/users/'+ticketId)
+		fetch('/api/ticket/users/assigned/'+ticketId)
 			.then((response) => {
 				return response.json();
 			})
 			.then((userData) => {
 				setActiveUsers(userData)
 			})
-		.catch(error => console.log('TODO: write nice error message'))
-	}
+	}, [])
 
 	function addUserHandler(user) {
 		fetch('/api/ticket/organization/users/add/'+ticketId, {
@@ -53,7 +80,6 @@ const AssignedTicketUsers = props => {
 		.then((data) => {
 			console.log(data);
 		})
-		fetchData();
 	}
 
 	function removeUserHandler(user) {
@@ -73,7 +99,6 @@ const AssignedTicketUsers = props => {
 		.then((data) => {
 			console.log(data);
 		})
-		fetchData();
 	}
 	
 	const activeUserHandler = (user) => {
@@ -85,20 +110,15 @@ const AssignedTicketUsers = props => {
 			addUserHandler(user)
 			setActiveUsers([...activeUsers, user])
 		}
+		// fetchData();
 	}
-	
-	useEffect(() => {
-		{console.log('fetching data...')}
-		fetchData();
-		{console.log('fetching data completed')}
-	}, [activeUsers.length])
 
 
 	return (
-		<div>
-			<TicketUserList title="Assign Staff" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={staffUsers} />
-			<TicketUserList title="Assign Users" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={organizationUsers} />
-		</div>
+		<>
+		<TicketUserList title="Assign Staff" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={staffUsers} />
+		<TicketUserList title="Assign Users" activeUsers={activeUsers} activeUserHandler={activeUserHandler} users={organizationUsers} />
+		</>
 	)
 }
 
