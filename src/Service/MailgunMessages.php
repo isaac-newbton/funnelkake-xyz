@@ -10,7 +10,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MailgunMessages{
-	public function makeTicketFromInboundMessage($post_data, $files_data, EntityManagerInterface $entity_manager, MediaManager $media_manager, OrganizationRepository $org_repository) : Ticket{
+	private $orgRepository;
+
+	public function __construct(OrganizationRepository $orgRepository){
+		$this->orgRepository = $orgRepository;
+	}
+
+	public function makeTicketFromInboundMessage($post_data, $files_data, EntityManagerInterface $entity_manager, MediaManager $media_manager) : Ticket{
 		$ticket = new Ticket();
 		if($post_data['body-html']){
 			$comment = new Comment();
