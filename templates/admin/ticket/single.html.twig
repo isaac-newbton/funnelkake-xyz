@@ -31,14 +31,17 @@
 
             <div class="row">
                 <div class="col">
-                    <div class="btn-group">
-                        <button class="btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#addCommentForm" aria-expanded="false" aria-controls="collapseExample">
                             Add Reply
                         </button>
+                        <button class="btn btn-primary" type="button" data-toggle='modal' data-target='#mediaFileForm' aria-expanded="false" aria-controls="collapseExample">
+                            Upload File
+                        </button>
                         {% if ticket.getStatusText == 'closed' %}
-                            <a href="{{ path("tickets_open", {id: ticket.id}) }}" class="btn btn-sm btn-success">Reopen Ticket</a>
+                            <a href="{{ path("tickets_open", {id: ticket.id}) }}" class="btn btn-success">Reopen Ticket</a>
                         {% else %}
-                        <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-sm btn-secondary" onclick="return confirm('Are you sure you want to close this ticket?')">Close Ticket</a>
+                        <a href="{{ path("tickets_close", {id: ticket.id}) }}" class="btn btn-secondary" onclick="return confirm('Are you sure you want to close this ticket?')">Close Ticket</a>
                         {% endif %}
                     </div>
                 </div>
@@ -46,7 +49,7 @@
 
             <div class="row py-3">
                 <div class="col">
-                    <div class="collapse py-5" id="collapseExample">
+                    <div class="collapse py-5" id="addCommentForm">
                             {{ form_start(commentForm) }}
                             {{ form_row(commentForm.content, { label: "Reply" })}}
                             <input type="submit" class="btn btn-primary" value="Submit">
@@ -123,6 +126,23 @@
         })
     </script>
 {% endif %}
+
+{# File Upload #}
+<div class="modal fade" id="mediaFileForm" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">File Upload</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{ form(mediaFileForm) }}
+            </div>
+        </div>
+    </div>
+</div>
 
 
 {% block javascripts %}

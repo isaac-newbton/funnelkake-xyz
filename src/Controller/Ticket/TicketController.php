@@ -14,9 +14,12 @@ use App\Entity\Organization;
 use App\Entity\User;
 use App\Form\Type\Ticket\TicketStaffType;
 use App\Form\Type\Comment\CommentType;
+use App\Form\Type\MediaFile\MediaFileType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Form\Type\Ticket\TicketOrganizationType;
 use App\Form\Type\Ticket\TicketUsersType;
 use App\Service\Email\EmailServiceHandler;
+use App\Service\Media\MediaManager;
 use App\Service\Timestamp\TimestampHandler;
 use App\Service\UserRole\UserRoleHandler;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -198,7 +201,7 @@ class TicketController extends AbstractController {
      * @IsGranted("ROLE_USER")
      */
 
-    public function viewTicket(int $id, Request $request, TimestampHandler $timestamp, EmailServiceHandler $emailServiceHandler){
+    public function viewTicket(int $id, Request $request, TimestampHandler $timestamp, EmailServiceHandler $emailServiceHandler, MediaManager $mediaManager){
         $twig_forms = [];
         $ticket = $this->getDoctrine()->getRepository(Ticket::class)->find($id);
         if ($this->isGranted("ROLE_STAFF") || $this->getUser()->getOrganization() == $ticket->getOrganization()){
@@ -329,7 +332,35 @@ class TicketController extends AbstractController {
                 $entityManager->flush();
                 return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
             }
+
+            $mediaFileForm = $this->createForm(MediaFileType::class);
+            $twig_forms['mediaFileForm'] = $mediaFileForm->createView();
+
+            $mediaFileForm->handleRequest($request);
+            if ($mediaFileForm->isSubmitted() && $mediaFileForm->isValid()){
+                $entityManager = $this->getDoctrine()->getManager();
+                $mediaFile = $mediaFileForm->getData();
+                $mediaFile->addTicket($ticket);
+                $mediaFile->setUser($this->getUser());
+                $mediaFile->setOrganization($ticket->getOrganization());
+
+                // TODO: This should happen in the formType since it will always occur when uploading files?
+                /**
+                 * @var UploadedFile $uploadedFile
+                 **/
+                $uploadedFile = $mediaFileForm->get('file')->getData();
+                $mediaManager->uploadToMediaFile($uploadedFile, $mediaFile);
+
+                if($name = $mediaFileForm->get('name')->getData()){
+                    $mediaFile->setName($name);
+                }
+            
+                $entityManager->persist($mediaFile);
+                $entityManager->flush();
+                return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
+            }
         }
+
         
         $render_args = ["ticket" => $ticket];
         return $this->render("admin/ticket/single.html.twig", array_merge($render_args, $twig_forms));
