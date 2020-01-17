@@ -264,9 +264,12 @@ class TicketController extends AbstractController {
             if ($ticketData && $organization) {
                 // remove users when we assign ticket to a new organization
                 // TODO: this shouldn't remove staff members
+                // TODO: the following logic should happen in a service like $ticketHandler->reassignOrganization(Ticket $ticket, Organization $organization)
                 foreach($ticket->getUsers() as $user){
                     $ticket->removeUser($user);
                 }
+
+                // TODO: do something about the files attached to this ticket when we reassign a ticket to a different organization
 
                 $ticketData->setOrganization($organization);
                 $entityManager->persist($ticketData);
@@ -276,63 +279,7 @@ class TicketController extends AbstractController {
         }
         $twig_forms['ticketOrganizationForm'] = $ticketOrganizationForm->createView();
 
-        $ticketStaffForm = $this->createForm(TicketStaffType::class, $ticket);
-        $ticketStaffForm->add('submit', SubmitType::class);
-        // TODO: This following 11 lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers()
-        $userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
-        $users = $this->getDoctrine()->getRepository(User::class)->findAll();
-        $staff_users = [];
-        foreach($users as $u){
-            foreach($u->getRoles() as $user_role){
-                if (in_array('ROLE_STAFF', $userRoleHandler->getInheritedRoles($user_role))){
-                    $staff_users[] = $u;
-                    continue;
-                }
-            }
-        }
-        $ticketStaffForm->add('users', EntityType::class, [
-            'class' => User::class,
-            'choices' => $staff_users,
-            'choice_label' => function ($u) {
-                return $u->getEmail();
-            },
-            'multiple' => true,
-            'expanded' => true
-        ]);
-
-        $ticketStaffForm->handleRequest($request);
-        if ($ticketStaffForm->isSubmitted() && $ticketStaffForm->isValid()){
-            $entityManager = $this->getDoctrine()->getManager();
-            $ticketData = $ticketStaffForm->getData();
-            $entityManager->persist($ticketData);
-            $entityManager->flush();
-            return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
-        }
-        $twig_forms['ticketStaffForm'] = $ticketStaffForm->createView();
-
         if ($ticket->getOrganization()){
-            $ticketUsersForm = $this->createForm(TicketUsersType::class, $ticket);
-            $ticketUsersForm->add('users', EntityType::class, [
-                'class' => User::class,
-                'choices' => $ticket->getOrganization()->getUsers(),
-                'choice_label' => function ($u) {
-                    return $u->getEmail();
-                },
-                'multiple' => true,
-                'expanded' => true
-            ]);
-            $ticketUsersForm->add('submit', SubmitType::class);
-            $twig_forms['ticketUsersForm'] = $ticketUsersForm->createView();
-
-            $ticketUsersForm->handleRequest($request);
-            if ($ticketUsersForm->isSubmitted() && $ticketUsersForm->isValid()){
-                $entityManager = $this->getDoctrine()->getManager();
-                $ticketData = $ticketUsersForm->getData();
-                $entityManager->persist($ticketData);
-                $entityManager->flush();
-                return $this->redirectToRoute("tickets_single", ["id" => $ticket->getId() ]);
-            }
-
             $mediaFileForm = $this->createForm(MediaFileType::class);
             $twig_forms['mediaFileForm'] = $mediaFileForm->createView();
 
