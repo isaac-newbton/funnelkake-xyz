@@ -38,7 +38,6 @@ class TicketController extends AbstractController {
         if ( $form->isSubmitted() && $form->isValid() ){
             // set the tickets organization
             if ($this->getUser()){
-                // TODO: this block isn't working
                 // user is logged in already - just use their email
                 $organization = $this->getUser()->getOrganization();
             } else {
@@ -114,7 +113,6 @@ class TicketController extends AbstractController {
         ]);
 
         $ticketOrganizationForm->handleRequest($request);
-        // TODO: refactor this nasy bit at some point...
         if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
 
@@ -156,7 +154,6 @@ class TicketController extends AbstractController {
         ]);
 
         $ticketOrganizationForm->handleRequest($request);
-        // TODO: refactor this nasy bit at some point...
         if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
 
@@ -199,7 +196,6 @@ class TicketController extends AbstractController {
     /**
      * @Route("/tickets/view/{id}", name="tickets_single")
      * @IsGranted("ROLE_USER")
-     * TODO: make this viewable only by role_staff+ or role_user where role_user belongs to the organization this ticket is assigned to
      */
 
     public function viewTicket(int $id, Request $request, TimestampHandler $timestamp, EmailServiceHandler $emailServiceHandler){
@@ -256,7 +252,6 @@ class TicketController extends AbstractController {
         $ticketOrganizationForm->add('submit', SubmitType::class);
 
         $ticketOrganizationForm->handleRequest($request);
-        // TODO: refactor this nasy bit at some point...
         if ($ticketOrganizationForm->isSubmitted() && $ticketOrganizationForm->isValid()){
             $entityManager = $this->getDoctrine()->getManager();
 
@@ -264,6 +259,12 @@ class TicketController extends AbstractController {
             $organization = $ticketOrganizationForm->get('organization')->getData();
 
             if ($ticketData && $organization) {
+                // remove users when we assign ticket to a new organization
+                // TODO: this shouldn't remove staff members
+                foreach($ticket->getUsers() as $user){
+                    $ticket->removeUser($user);
+                }
+
                 $ticketData->setOrganization($organization);
                 $entityManager->persist($ticketData);
                 $entityManager->flush();
@@ -274,7 +275,7 @@ class TicketController extends AbstractController {
 
         $ticketStaffForm = $this->createForm(TicketStaffType::class, $ticket);
         $ticketStaffForm->add('submit', SubmitType::class);
-        // TODO: This following 11 lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers() on the following ->add(['choice_label'])
+        // TODO: This following 11 lines should occur completely in a service that we call i.e. $userRoleHandler->getStaffUsers()
         $userRoleHandler = new UserRoleHandler(new RoleHierarchy($this->getParameter('security.role_hierarchy.roles')));
         $users = $this->getDoctrine()->getRepository(User::class)->findAll();
         $staff_users = [];
