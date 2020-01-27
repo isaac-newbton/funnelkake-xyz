@@ -38,6 +38,11 @@ class Organization
      */
     private $ticketEmailSlug;
 
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Microsite", mappedBy="organization", cascade={"persist", "remove"})
+     */
+    private $microsite;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -131,6 +136,23 @@ class Organization
     public function setTicketEmailSlug(?string $ticketEmailSlug): self
     {
         $this->ticketEmailSlug = $ticketEmailSlug;
+
+        return $this;
+    }
+
+    public function getMicrosite(): ?Microsite
+    {
+        return $this->microsite;
+    }
+
+    public function setMicrosite(Microsite $microsite): self
+    {
+        $this->microsite = $microsite;
+
+        // set the owning side of the relation if necessary
+        if ($microsite->getOrganization() !== $this) {
+            $microsite->setOrganization($this);
+        }
 
         return $this;
     }
